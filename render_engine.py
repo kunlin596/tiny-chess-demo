@@ -1,46 +1,55 @@
 from PyQt5.QtCore import pyqtProperty, pyqtSignal, pyqtSlot, QObject, QSize
 from PyQt5.QtQuick import QQuickItem
 from PyQt5.QtCore import Qt
+from PyQt5.QtQuick import QQuickView
 
-from PyQt5.QtGui import QOpenGLShaderProgram, QOpenGLShader, QMatrix4x4, QOpenGLContext
+from PyQt5.QtGui import QOpenGLShaderProgram, QOpenGLShader, QMatrix4x4, QOpenGLContext, QOpenGLDebugLogger
 from utils import *
-from geometries import Cube, Sphere
 
 import random
-import sys
 import OpenGL.GL as GL
 import numpy as np
+import pyassimp as ai
+
+FLOAT_SIZE = 4
+UNSIGNED_INT_SIZE = 4
+
+CUBE_INDEX = 0
+BUNNY_INDEX = 1
 
 
-class Entity(object):
-	def __init__ ( self, model, position, rotation, scale_val ):
-		self.model = model
-		self.position = position
-		self.rotation = rotation
-		self.scale = scale_val
-
-
-class ModelUnderlay(QQuickItem):
-	theta_changed = pyqtSignal(name = 'theta_changed')  # the optional unbound notify signal. Probably no need herel
-
+class EditorView(QQuickView):
 	def __init__ ( self, parent = None ):
-		super(ModelUnderlay, self).__init__(parent)
+		super(EditorView, self).__init__(parent)
 		self._renderer = None
-		self.windowChanged.connect(self.onWindowChanged)
-		self._renderer = ModelUnderlayRenderer()
+		self._camera = Camera()
+		self._renderer = SceneRenderer(self)
 
-	def onWindowChanged ( self, window ):
-		# Because it's in different thread which required a direct connection
-		# window == self.window(), they are pointing to the same window instance. Verified.
-		window.beforeSynchronizing.connect(self.sync, type = Qt.DirectConnection)
-		window.setClearBeforeRendering(False)  # otherwise quick would clear everything we render
+		self.sceneGraphInitialized.connect(self.initialize_scene, type = Qt.DirectConnection)
+		self.beforeSynchronizing.connect(self.synchronize_scene, type = Qt.DirectConnection)
+		self.beforeRendering.connect(self.render_scene, type = Qt.DirectConnection)
+		self.sceneGraphInvalidated.connect(self.invalidate_scene, type = Qt.DirectConnection)
 
-	@pyqtSlot(name = 'sync')
-	def sync ( self ):
-		self.window().beforeRendering.connect(self._renderer.paint, type = Qt.DirectConnection)
-		self._renderer.set_viewport_size(self.window().size() * self.window().devicePixelRatio())
-		self._renderer.set_window(self.window())
-		self._renderer.set_projection_matrix()
+		self.rootContext().setContextProperty("_camera", self._camera)
+		self.rootContext().setContextProperty("_window", self)
+
+		self.setClearBeforeRendering(False)  # otherwise quick would clear everything we render
+
+	def initialize_scene ( self ):
+		self._renderer.initialize()
+		self.resetOpenGLState()
+
+	def render_scene ( self ):
+		self._renderer.render()
+		self.resetOpenGLState()
+
+	def invalidate_scene ( self ):
+		self._renderer.invalidate()
+		self.resetOpenGLState()
+
+	def synchronize_scene ( self ):
+		self._renderer.sync()
+		self.resetOpenGLState()
 
 	@pyqtSlot(int)
 	def add_geometry ( self, geo_enum ):
@@ -95,139 +104,79 @@ class ModelUnderlay(QQuickItem):
 		self._renderer.change_random_sphere_color()
 
 
-class ModelUnderlayRenderer(QObject):
-	def __init__ ( self, parent = None ):
-		super(ModelUnderlayRenderer, self).__init__(parent)
+class SceneRenderer(QObject):
+	def __init__ ( self, window = None, parent = None ):
+		super(SceneRenderer, self).__init__(parent)
 
-		self._cube_shader = None
-		self._sphere_shader = None
-		self._viewport_size = QSize()
-		self._window = None
+		self._window = window
+		self._viewport_size = None
 		self._camera = Camera()
-
-		self._perspective_projection_matrix = None
-		self._orthographic_projection_matrix = None
+		self._shader = None
 
 		self._model_matrix = np.identity(4)
+		self._projection_matrix = perspective_projection(45.0, 640.0 / 480.0, 0.001, 1000.0)
 
-		self._projection_type = 0
-		self._projection_matrix = perspective_projection(45.0,
-		                                                 640.0 / 480.0,
-		                                                 0.001, 1000.0)
+		self._cpu_manager = GpuManager()  # load data onto gpu
+		self._mesh_data = dict()  # store all the raw mesh data
+		self._models = dict()  # for model-entity look up
+		self._entities = dict()
 
-		self._index_buffer = -1
+	def initialize ( self ):
+		self.set_projection_matrix()
+		self.set_viewport_size(self._window.size() * self._window.devicePixelRatio())
+		self._mesh_data[CUBE_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'cube')
+		self._mesh_data[BUNNY_INDEX] = MeshData.ReadFromFile('mesh/bunny.obj', 'bunny')
 
-		# keep track of the objects in the scene
-		self._cube_model = Cube()
-		self._sphere_model = Sphere()
+		self.create_shader()
+		# load all the mesh data into gpu
+		self._shader.bind()
+		for k, v in self._mesh_data.items():
+			self._models[k] = self._cpu_manager.load_to_vao(v)
+			self._entities[k] = []
+		self._shader.release()
 
-		self._models = dict()
+	def sync ( self ):
+		pass
 
-		# storing the entities of cube
-		self._models[self._cube_model] = []
+	def invalidate ( self ):
+		pass
 
-		# storing the entities of sphere
-		self._models[self._sphere_model] = []
+	def render ( self ):
 
-	@pyqtSlot()
-	def paint ( self ):
 		w = self._viewport_size.width()
 		h = self._viewport_size.height()
 
 		GL.glViewport(0, 0, int(w), int(h))
-		GL.glClearColor(0.1, 0.1, 0.1, 1)
+		GL.glClearColor(0.8, 0.8, 0.8, 1)
 		GL.glEnable(GL.GL_DEPTH_TEST)
 		GL.glClear(GL.GL_COLOR_BUFFER_BIT)
 		GL.glClear(GL.GL_DEPTH_BUFFER_BIT)
 
-		GL.glGenVertexArrays(1)
-
 		view_matrix = self._camera.get_view_matrix()
 
-		if self._cube_shader is None:
-			self._cube_shader = QOpenGLShaderProgram()
-			self._cube_shader.addShaderFromSourceFile(QOpenGLShader.Vertex, 'shaders/OpenGL_2_1/vertex.glsl')
-			self._cube_shader.addShaderFromSourceFile(QOpenGLShader.Fragment, 'shaders/OpenGL_2_1/fragment.glsl')
-			self._cube_shader.bindAttributeLocation('position', 0)
-			self._cube_shader.bindAttributeLocation('color', 1)
-			self._cube_shader.link()
+		self._shader.bind()
+		self._shader.setUniformValue('view_matrix',
+		                             QMatrix4x4(view_matrix.flatten().tolist()))
+		self._shader.setUniformValue('projection_matrix',
+		                             QMatrix4x4(self._projection_matrix.flatten().tolist()).transposed())
 
-		self._cube_shader.bind()
-		self._cube_shader.enableAttributeArray(0)
-		self._cube_shader.enableAttributeArray(1)
-		self._cube_shader.setAttributeArray(0, self._cube_model.vertices.tolist())
-		self._cube_shader.setAttributeArray(1, self._cube_model.colors.tolist())
-		self._cube_shader.setUniformValue('view_matrix',
-		                                  QMatrix4x4(view_matrix.flatten().tolist()))
-		self._cube_shader.setUniformValue('projection_matrix',
-		                                  QMatrix4x4(self._projection_matrix.flatten().tolist()).transposed())
-
-		if self._cube_model in self._models.keys():
-			for entity in self._models[self._cube_model]:
-				m = create_transformation_matrix(entity.position, entity.rotation, entity.scale)
-				self._cube_shader.setUniformValue('model_matrix', QMatrix4x4(m.flatten().tolist()))
+		for k, v in self._entities.items():
+			# create a transformation for every entity based on its pose
+			self.setup_model(self._models[k])
+			for entity in v:
+				self.setup_entity(entity)
 				GL.glDrawElements(GL.GL_TRIANGLES,
-				                  len(self._cube_model.indices),
+				                  self._models[k].num_indices,
 				                  GL.GL_UNSIGNED_INT,
-				                  self._cube_model.indices.tolist())
+				                  self._mesh_data[k].indices)
 
-		self._cube_shader.disableAttributeArray(0)
-		self._cube_shader.disableAttributeArray(1)
-		self._cube_shader.release()
-
-		if self._sphere_shader is None:
-			self._sphere_shader = QOpenGLShaderProgram()
-			self._sphere_shader.addShaderFromSourceFile(QOpenGLShader.Vertex, 'shaders/OpenGL_2_1/vertex.glsl')
-			self._sphere_shader.addShaderFromSourceFile(QOpenGLShader.Fragment, 'shaders/OpenGL_2_1/fragment.glsl')
-			self._sphere_shader.bindAttributeLocation('position', 0)
-			self._sphere_shader.bindAttributeLocation('color', 1)
-			self._sphere_shader.link()
-
-		self._sphere_shader.bind()
-		self._sphere_shader.enableAttributeArray(0)
-		self._sphere_shader.enableAttributeArray(1)
-		self._sphere_shader.setAttributeArray(0, self._sphere_model.vertices.tolist())
-		self._sphere_shader.setAttributeArray(1, self._sphere_model.colors.tolist())
-		self._sphere_shader.setUniformValue('view_matrix',
-		                                    QMatrix4x4(view_matrix.flatten().tolist()))
-		self._sphere_shader.setUniformValue('projection_matrix',
-		                                    QMatrix4x4(self._projection_matrix.flatten().tolist()).transposed())
-
-		if self._sphere_model in self._models.keys():
-			for entity in self._models[self._sphere_model]:
-				m = create_transformation_matrix(entity.position, entity.rotation, entity.scale)
-				self._cube_shader.setUniformValue('model_matrix', QMatrix4x4(m.flatten().tolist()))
-				GL.glDrawElements(GL.GL_TRIANGLES,
-				                  len(self._sphere_model.indices),
-				                  GL.GL_UNSIGNED_INT,
-				                  self._sphere_model.indices.tolist())
-		self._sphere_shader.disableAttributeArray(0)
-		self._sphere_shader.disableAttributeArray(1)
-		self._sphere_shader.release()
-
-		# def build_rotation_matrix (t):
-		# 	m = np.identity(4)
-		# 	m[0][0] = np.cos(np.radians(t))
-		# 	m[0][2] = np.sin(np.radians(t))
-		# 	m[2][0] = -np.sin(np.radians(t))
-		# 	m[2][2] = np.cos(np.radians(t))
-		# 	return m
-		#
-		# global theta
-		# theta += 1
-		# self._model_matrix = build_rotation_matrix(theta)
-		# self._model_matrix[2][3] = -3
-
+		self._shader.release()
 
 		# Restore the OpenGL state for QtQuick rendering
-		self._window.resetOpenGLState()
 		self._window.update()
 
 	def set_viewport_size ( self, size ):
 		self._viewport_size = size
-
-	def set_window ( self, window ):
-		self._window = window
 
 	def set_projection_matrix ( self ):
 		# Need to be set every time we change the size of the window
@@ -235,57 +184,205 @@ class ModelUnderlayRenderer(QObject):
 		                                                 self._window.width() / self._window.height(),
 		                                                 0.001, 1000.0)
 
-	def move_model ( self, val ):
-		self._model_matrix[2][3] += val
+	def setup_model ( self, model ):
+		raw_model = model
+		GL.glBindVertexArray(raw_model.vao)
+		GL.glEnableVertexAttribArray(0)
+		# GL.glEnableVertexAttribArray(1)
+		# GL.glEnableVertexAttribArray(2)
 
-	def move_camera ( self ):
-		pass
+	def setup_entity ( self, entity ):
+		m = create_transformation_matrix(entity.position,
+		                                 entity.rotation,
+		                                 entity.scale)
+		self._shader.setUniformValue('model_matrix', QMatrix4x4(m.flatten().tolist()))
 
 	def add_geometry ( self, geo_enum ):
 		if geo_enum == 0:
-			self._models[self._cube_model].append(Entity(self._cube_model,
-			                                             np.array([random.uniform(-3.0, 3.0),
-			                                                       random.uniform(-3.0, 3.0),
-			                                                       random.uniform(-20.0, -10.0)]),
-			                                             np.array([random.uniform(-45.0, 45.0),
-			                                                       random.uniform(-45.0, 45.0),
-			                                                       random.uniform(-45.0, 45.0)]),
-			                                             np.array([1.0, 1.0, 1.0])))
+			self._entities[CUBE_INDEX].append(Entity(self._models[CUBE_INDEX],
+			                                         np.array([random.uniform(-3.0, 3.0),
+			                                                   random.uniform(-3.0, 3.0),
+			                                                   random.uniform(-20.0, -10.0)]),
+			                                         np.array([random.uniform(-45.0, 45.0),
+			                                                   random.uniform(-45.0, 45.0),
+			                                                   random.uniform(-45.0, 45.0)]),
+			                                         np.array([1.0, 1.0, 1.0])))
 		elif geo_enum == 1:
-			self._models[self._sphere_model].append(Entity(self._sphere_model,
-			                                               np.array([random.uniform(-3.0, 3.0),
-			                                                         random.uniform(-3.0, 3.0),
-			                                                         random.uniform(-20.0, -10.0)]),
-			                                               np.array([random.uniform(-30.0, 30.0),
-			                                                         random.uniform(-30.0, 30.0),
-			                                                         random.uniform(-30.0, 30.0)]),
-			                                               np.array([1.0, 1.0, 1.0])))
+			self._entities[BUNNY_INDEX].append(Entity(self._models[BUNNY_INDEX],
+			                                          np.array([random.uniform(-3.0, 3.0),
+			                                                    random.uniform(-3.0, 3.0),
+			                                                    random.uniform(-20.0, -10.0)]),
+			                                          np.array([random.uniform(-30.0, 30.0),
+			                                                    random.uniform(-30.0, 30.0),
+			                                                    random.uniform(-30.0, 30.0)]),
+			                                          np.array([1.0, 1.0, 1.0])))
 		else:
 			return
 
 	def delete_geometry ( self, geo_enum ):
-		if geo_enum == 0:
-			if self._models[self._cube_model]:
-				self._models[self._cube_model].pop()
-		elif geo_enum == 1:
-			if self._models[self._sphere_model]:
-				self._models[self._sphere_model].pop()
+		pass
 
-	def change_random_cube_color ( self ):
-		tmp = self._models[self._cube_model]
-		self._models.pop(self._cube_model)
-		self._cube_model = Cube()
-		self._models[self._cube_model] = tmp
-
-	def change_random_sphere_color ( self ):
-		tmp = self._models[self._sphere_model]
-		self._models.pop(self._sphere_model)
-		self._sphere_model = Sphere()
-		self._models[self._sphere_model] = tmp
+	def create_shader ( self ):
+		self._shader = QOpenGLShaderProgram()
+		self._shader.addShaderFromSourceFile(QOpenGLShader.Vertex, 'shaders/OpenGL_4_1/vertex.glsl')
+		self._shader.addShaderFromSourceFile(QOpenGLShader.Fragment, 'shaders/OpenGL_4_1/fragment.glsl')
+		self._shader.link()
 
 
-class Camera(object):
+class MeshData:
+	"""
+	Data structure for the mesh data
+	"""
+
+	def __init__ ( self,
+	               name = 'None',
+	               vertices = None,
+	               colors = None,
+	               normals = None,
+	               indices = None,
+	               texturecoords = None ):
+		self.name = name
+		self.vertices = vertices
+		self.colors = colors
+		self.normals = normals
+		self.indices = indices
+		self.texturecoords = texturecoords
+
+	@classmethod
+	def CheckData ( cls, mesh ):
+		if len(mesh.vertices) == 0:
+			print('vertices is empty')
+		if len(mesh.colors) == 0:
+			print('colors is empty')
+		if len(mesh.normals) == 0:
+			print('normals is empty')
+		if len(mesh.indices) == 0:
+			print('indices is empty')
+		if len(mesh.texturecoords) == 0:
+			print('texturecoords is empty')
+
+	@classmethod
+	def ReadFromFile ( cls, file_name, name = 'None' ):
+		scene = ai.load(file_name)
+		mesh = scene.meshes[0]
+		vertices = mesh.vertices
+		indices = mesh.faces.flatten()  # make 1d for passing
+		colors = mesh.colors
+		normals = mesh.normals
+		texturecoords = mesh.texturecoords
+
+		if len(colors) == 0:
+			colors = [[0.5, 0.5, 0.5] for i in range(len(vertices))]
+
+		return MeshData(name, vertices, colors, normals, indices, texturecoords)
+
+
+# Handler of vao and other thing related to gpu
+class RawModel(object):
+	def __init__ ( self, vao, num_indices ):
+		self.vao = vao
+		self.num_indices = num_indices  # For glDrawElements()
+
+
+class Entity(object):
+	def __init__ ( self, model, position, rotation, scale ):
+		self.model = model
+		self.position = position
+		self.rotation = rotation
+		self.scale = scale
+
+
+# class TexturedModel(object):
+# 	def __init__ ( self, raw_model = None, texture = None ):
+# 		self.raw_model = raw_model
+# 		self.texture = texture
+#
+
+# For loading mesh data into gpu
+class GpuManager(object):
+	POSITION_LOCATION = 0
+	COLOR_LOCATION = 1
+	NORMAL_LOCATION = 2
+
+	def __init__ ( self ):
+		self.vaos = []
+		self.vbos = []
+		self.textures = []
+
+	def load_to_vao ( self, mesh_data ):
+		"""
+		Upload data to GPU
+		:return: RawModel
+		"""
+		vao = self.create_and_bind_vao()
+		self.set_vertex_attribute_data(GpuManager.POSITION_LOCATION, 3, mesh_data.vertices)
+		# self.set_vertex_attribute_data(GpuManager.COLOR_LOCATION, 3, mesh_data.colors)
+		# self.set_vertex_attribute_data(GpuManager.NORMAL_LOCATION, 3, mesh_data.normals)
+
+		self.create_and_bind_indices_buffer(mesh_data.indices)
+		self.unbind_vao()
+
+		return RawModel(vao, len(mesh_data.indices))
+
+	def set_vertex_attribute_data ( self, attrib_id, component_size, data ):
+		vbo = GL.glGenBuffers(1)
+
+		GL.glBindBuffer(GL.GL_ARRAY_BUFFER, vbo)
+		GL.glBufferData(GL.GL_ARRAY_BUFFER, len(data) * FLOAT_SIZE, data, GL.GL_STATIC_DRAW)
+		GL.glVertexAttribPointer(attrib_id, component_size, GL.GL_FLOAT, False, 0, 0)
+		GL.glBindBuffer(GL.GL_ARRAY_BUFFER, 0)
+
+		self.vbos.append(vbo)
+
+	# def load_texture ( self ):
+	# 	texture = Texture.CreateFromFile('')
+	# 	GL.glGenerateMipmap(GL.GL_TEXTURE_2D)
+	# 	GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR)
+	# 	GL.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_LOD_BIAS, -0.4)
+
+	def create_and_bind_vao ( self ):
+		vao = GL.glGenVertexArrays(1)
+		self.vaos.append(vao)
+		GL.glBindVertexArray(vao)
+		return vao
+
+	def unbind_vao ( self ):
+		GL.glBindVertexArray(0)
+
+	def create_and_bind_indices_buffer ( self, indices ):
+		vbo = GL.glGenBuffers(1)
+		GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, vbo)
+		GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER,
+		                len(indices) * UNSIGNED_INT_SIZE,
+		                indices,
+		                GL.GL_STATIC_DRAW)
+		# GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)
+		self.vbos.append(vbo)
+
+	def release_all ( self ):
+		for b in self.vaos:
+			GL.glDeleteVertexArrays(b)
+		for b in self.vbos:
+			GL.glDeleteBuffers(b)
+
+
+# class Texture(object):
+# 	def __init__ ( self, data = None, width = None, height = None ):
+# 		self.data = data
+# 		self.width = width
+# 		self.height = height
+# 		self.reflectivity = 0.0
+# 		self.shine_damper = 1.0
+# 		self.has_transparency = False
+#
+# 	@classmethod
+# 	def CreateFromFile ( cls, file_name ):
+# 		return Texture()
+
+
+class Camera(QObject):
 	def __init__ ( self, parent = None ):
+		super(Camera, self).__init__(parent)
 		self._eye = np.array([0.0, 0.0, -30.0])
 		self._up = np.array([0.0, 1.0, 0.0])
 		self._target = np.array([0.0, 0.0, 1.0])
