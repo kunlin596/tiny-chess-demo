@@ -103,22 +103,16 @@ def scale (scale_vec):
 	return m
 
 
-def create_transformation_matrix (translation,
+def create_transformation_matrix (trans,
                                   rotation,
                                   scale_val):
 	m = np.identity(4)
+	m1 = translate(trans)
 	m2 = rotate_x(rotation[0])
 	m3 = rotate_y(rotation[1])
 	m4 = rotate_z(rotation[2])
 	m5 = scale(scale_val)
 
-	m = m5 * m4 * m3 * m2 * m
-
-	m[0][3] = translation[0]
-	m[1][3] = translation[1]
-	m[2][3] = translation[2]
-	# m[0][3] = 0
-	# m[1][3] = 0
-	# m[2][3] = 30
+	m = m5 @ m4 @ m3 @ m2 @ m1 @ m
 
 	return m
