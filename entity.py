@@ -23,7 +23,7 @@ class Camera(QObject):
 
 	def __init__ ( self, parent = None ):
 		super(Camera, self).__init__(parent)
-		self.eye = np.array([0.0, 40.0, -20.0])
+		self.eye = np.array([0.0, 40.0, -60.0])
 		self.up = np.array([0.0, 1.0, 0.0])
 		self.target = np.array([0.0, -0.2, 0.8])
 		self.x = None
@@ -82,29 +82,31 @@ class EntityCreator(object):
 		              scale,
 		              color)
 
-	def create_checker_board ( self, length = 10.0, rows = 10, cols = 10 ):
+	def create_checker_board ( self, length = 10.0, rows = 8, cols = 8 ):
 		entities = []
-
-		y = -0.2
-		width = length
-		height = length
-
+		y = -0.25
 		color_black = np.array([0.0, 0.0, 0.0])
 		color_white = np.array([1.0, 1.0, 1.0])
 
 		for row in range(rows):
+			r = []
 			for col in range(cols):
-				position = np.array([col * 10.0 - cols * 10.0 / 2 + 5.0, y, row * 10.0 + 10.0 * rows / 2 - 5.0])
+				position = np.array(
+					[col * length - cols * length / 2.0 + length / 2.0,
+					 y,
+					 row * length - rows * length / 2.0 + length / 2.0])
 				rotation = np.array([0.0, 0.0, 0.0])
-				scale = np.array([10.0, 0.2, 10.0])
+				scale = np.array([10.0, 0.5, 10.0])
 				if (col + row) % 2 == 0:
-					color = color_black
+					color = color_black.copy()
 				else:
-					color = color_white
-				entities.append(Entity(self._models[CUBE_INDEX],
+					color = color_white.copy()
+				r.append(Entity(self._models[CUBE_INDEX],
 				                       position,
 				                       rotation,
 				                       scale,
 				                       color))
-
+			print(len(r))
+			entities.append(r)
+		print(len(entities))
 		return entities

@@ -2,12 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9c6112ad-563d-4ac9-919a-6e036a8f30a3" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/game_engine.py" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/scene_view.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/entity.py" afterPath="$PROJECT_DIR$/entity.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/ModelWindow.qml" afterPath="$PROJECT_DIR$/lib/ModelWindow.qml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/render_engine.py" afterPath="$PROJECT_DIR$/render_engine.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/shaders/OpenGL_4_1/fragment.glsl" afterPath="$PROJECT_DIR$/shaders/OpenGL_4_1/fragment.glsl" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/utils.py" afterPath="$PROJECT_DIR$/utils.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -22,13 +21,13 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.38376385">
+    <splitter split-orientation="horizontal" split-proportion="0.3900896">
       <split-first>
         <leaf>
           <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/main.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="442">
+                <state relative-caret-position="483">
                   <caret line="29" column="10" lean-forward="false" selection-start-line="29" selection-start-column="10" selection-end-line="29" selection-end-column="10" />
                   <folding>
                     <element signature="e#0#10#0" expanded="true" />
@@ -37,7 +36,7 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="game_engine.py" pinned="false" current-in-tab="false">
+          <file leaf-file-name="game_engine.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/game_engine.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="26">
@@ -59,14 +58,13 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="utils.py" pinned="false" current-in-tab="true">
+          <file leaf-file-name="utils.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/utils.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1378">
-                  <caret line="211" column="0" lean-forward="true" selection-start-line="211" selection-start-column="0" selection-end-line="211" selection-end-column="0" />
+                <state relative-caret-position="573">
+                  <caret line="227" column="51" lean-forward="false" selection-start-line="227" selection-start-column="51" selection-end-line="227" selection-end-column="51" />
                   <folding>
                     <element signature="e#0#18#0" expanded="true" />
-                    <element signature="e#236#500#0" expanded="false" />
                     <element signature="e#537#861#0" expanded="false" />
                     <element signature="e#918#1341#0" expanded="false" />
                     <element signature="e#1373#1394#0" expanded="false" />
@@ -76,24 +74,8 @@
                     <element signature="e#1990#2078#0" expanded="false" />
                     <element signature="e#2107#2207#0" expanded="false" />
                     <element signature="e#2276#2468#0" expanded="false" />
-                    <element signature="e#2499#3361#0" expanded="false" />
-                    <element signature="e#3430#3715#0" expanded="false" />
-                    <element signature="e#3787#3898#0" expanded="false" />
-                    <element signature="e#3966#4042#0" expanded="false" />
-                    <element signature="e#4074#4580#0" expanded="false" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="ModelWindow.qml" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/lib/ModelWindow.qml">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="263">
-                  <caret line="48" column="46" lean-forward="false" selection-start-line="48" selection-start-column="46" selection-end-line="48" selection-end-column="46" />
-                  <folding>
-                    <element signature="e#0#8369#0" expanded="false" />
-                    <marker date="1484640335252" expanded="false" signature="1354:8365" ph="..." />
+                    <element signature="e#3396#3681#0" expanded="false" />
+                    <element signature="e#4029#4535#0" expanded="false" />
                   </folding>
                 </state>
               </provider>
@@ -106,18 +88,18 @@
           <file leaf-file-name="vertex.glsl" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/shaders/OpenGL_4_1/vertex.glsl">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="104">
+                <state relative-caret-position="26">
                   <caret line="4" column="37" lean-forward="true" selection-start-line="4" selection-start-column="37" selection-end-line="4" selection-end-column="37" />
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="fragment.glsl" pinned="false" current-in-tab="true">
+          <file leaf-file-name="fragment.glsl" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/shaders/OpenGL_4_1/fragment.glsl">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="274">
-                  <caret line="19" column="0" lean-forward="true" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
+                <state relative-caret-position="405">
+                  <caret line="22" column="37" lean-forward="true" selection-start-line="22" selection-start-column="37" selection-end-line="22" selection-end-column="37" />
                   <folding />
                 </state>
               </provider>
@@ -126,14 +108,13 @@
           <file leaf-file-name="entity.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/entity.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="472">
-                  <caret line="86" column="0" lean-forward="true" selection-start-line="86" selection-start-column="0" selection-end-line="86" selection-end-column="0" />
+                <state relative-caret-position="613">
+                  <caret line="101" column="21" lean-forward="true" selection-start-line="101" selection-start-column="21" selection-end-line="101" selection-end-column="21" />
                   <folding>
                     <element signature="e#0#12#0" expanded="true" />
                     <element signature="e#160#229#0" expanded="false" />
                     <element signature="e#250#279#0" expanded="false" />
                     <element signature="e#717#721#0" expanded="false" />
-                    <element signature="e#759#819#0" expanded="false" />
                     <element signature="e#872#992#0" expanded="false" />
                     <element signature="e#1042#1162#0" expanded="false" />
                     <element signature="e#1187#1299#0" expanded="false" />
@@ -142,43 +123,38 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="model.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/model.py">
+          <file leaf-file-name="render_engine.py" pinned="false" current-in-tab="true">
+            <entry file="file://$PROJECT_DIR$/render_engine.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="92">
-                  <caret line="71" column="30" lean-forward="true" selection-start-line="71" selection-start-column="30" selection-end-line="71" selection-end-column="30" />
+                <state relative-caret-position="494">
+                  <caret line="148" column="37" lean-forward="true" selection-start-line="148" selection-start-column="37" selection-end-line="148" selection-end-column="37" />
                   <folding>
-                    <element signature="e#0#18#0" expanded="true" />
-                    <element signature="e#68#1301#0" expanded="false" />
+                    <element signature="e#0#22#0" expanded="true" />
+                    <element signature="e#6195#6221#0" expanded="false" />
+                    <element signature="e#6262#6541#0" expanded="false" />
+                    <element signature="e#6579#6736#0" expanded="false" />
+                    <element signature="e#6769#6897#0" expanded="false" />
+                    <element signature="e#7324#7328#0" expanded="false" />
+                    <element signature="e#7361#7614#0" expanded="false" />
+                    <element signature="e#7656#7660#0" expanded="false" />
+                    <element signature="e#7707#7764#0" expanded="false" />
+                    <element signature="e#7801#8530#0" expanded="false" />
+                    <element signature="e#8571#8813#0" expanded="false" />
+                    <element signature="e#8843#10983#0" expanded="false" />
+                    <marker date="1484648718464" expanded="false" signature="2710:3340" ph="..." />
                   </folding>
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="render_engine.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/render_engine.py">
+          <file leaf-file-name="model.py" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/model.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="226">
-                  <caret line="111" column="52" lean-forward="true" selection-start-line="111" selection-start-column="52" selection-end-line="111" selection-end-column="52" />
+                <state relative-caret-position="119">
+                  <caret line="71" column="30" lean-forward="true" selection-start-line="71" selection-start-column="30" selection-end-line="71" selection-end-column="30" />
                   <folding>
-                    <element signature="e#0#22#0" expanded="true" />
-                    <element signature="e#375#1392#0" expanded="false" />
-                    <element signature="e#1422#3432#0" expanded="false" />
-                    <element signature="e#3456#3484#0" expanded="false" />
-                    <element signature="e#3514#3527#0" expanded="false" />
-                    <element signature="e#5314#5340#0" expanded="false" />
-                    <element signature="e#5381#5660#0" expanded="false" />
-                    <element signature="e#5698#5855#0" expanded="false" />
-                    <element signature="e#5888#6016#0" expanded="false" />
-                    <element signature="e#6056#6398#0" expanded="false" />
-                    <element signature="e#6443#6447#0" expanded="false" />
-                    <element signature="e#6480#6733#0" expanded="false" />
-                    <element signature="e#6775#6779#0" expanded="false" />
-                    <element signature="e#6826#6883#0" expanded="false" />
-                    <element signature="e#6920#7649#0" expanded="false" />
-                    <element signature="e#7690#7932#0" expanded="false" />
-                    <element signature="e#7962#10102#0" expanded="false" />
-                    <marker date="1484641285960" expanded="false" signature="2671:3301" ph="..." />
+                    <element signature="e#0#18#0" expanded="true" />
+                    <element signature="e#68#1301#0" expanded="false" />
                   </folding>
                 </state>
               </provider>
@@ -209,14 +185,14 @@
     <option name="CHANGED_PATHS">
       <list>
         <option value="$PROJECT_DIR$/tests/entity.py" />
-        <option value="$PROJECT_DIR$/shaders/OpenGL_4_1/fragment.glsl" />
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/shaders/OpenGL_4_1/vertex.glsl" />
         <option value="$PROJECT_DIR$/model.py" />
-        <option value="$PROJECT_DIR$/entity.py" />
         <option value="$PROJECT_DIR$/scene_view.py" />
         <option value="$PROJECT_DIR$/game_engine.py" />
+        <option value="$PROJECT_DIR$/shaders/OpenGL_4_1/fragment.glsl" />
         <option value="$PROJECT_DIR$/lib/ModelWindow.qml" />
+        <option value="$PROJECT_DIR$/entity.py" />
         <option value="$PROJECT_DIR$/utils.py" />
         <option value="$PROJECT_DIR$/render_engine.py" />
       </list>
@@ -549,7 +525,14 @@
       <option name="project" value="LOCAL" />
       <updated>1484639311832</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Implemented find checker board square world coord feature.">
+      <created>1484641370630</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1484641370630</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TodoView">
@@ -565,13 +548,13 @@
     <frame x="0" y="24" width="1920" height="1009" extended-state="6" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.13178703" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.13178703" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
       <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32930845" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.26673985" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.23710209" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.30186608" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
@@ -612,11 +595,12 @@
     <MESSAGE value="Implemented camera translation." />
     <MESSAGE value="Implemented camera rotation." />
     <MESSAGE value="Implemented a checkerboard as plane." />
-    <option name="LAST_COMMIT_MESSAGE" value="Implemented a checkerboard as plane." />
+    <MESSAGE value="Implemented find checker board square world coord feature." />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented find checker board square world coord feature." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="5" />
+      <option name="time" value="6" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -653,34 +637,20 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/shaders/OpenGL_4_1/vertex.glsl">
+    <entry file="file://$PROJECT_DIR$/lib/ModelWindow.qml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="104">
-          <caret line="4" column="37" lean-forward="true" selection-start-line="4" selection-start-column="37" selection-end-line="4" selection-end-column="37" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/entity.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="472">
-          <caret line="86" column="0" lean-forward="true" selection-start-line="86" selection-start-column="0" selection-end-line="86" selection-end-column="0" />
+        <state relative-caret-position="185">
+          <caret line="45" column="9" lean-forward="true" selection-start-line="45" selection-start-column="9" selection-end-line="45" selection-end-column="9" />
           <folding>
-            <element signature="e#0#12#0" expanded="true" />
-            <element signature="e#160#229#0" expanded="false" />
-            <element signature="e#250#279#0" expanded="false" />
-            <element signature="e#717#721#0" expanded="false" />
-            <element signature="e#759#819#0" expanded="false" />
-            <element signature="e#872#992#0" expanded="false" />
-            <element signature="e#1042#1162#0" expanded="false" />
-            <element signature="e#1187#1299#0" expanded="false" />
+            <element signature="e#0#8369#0" expanded="false" />
+            <marker date="1484643736520" expanded="false" signature="1354:8365" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/main.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="442">
+        <state relative-caret-position="483">
           <caret line="29" column="10" lean-forward="false" selection-start-line="29" selection-start-column="10" selection-end-line="29" selection-end-column="10" />
           <folding>
             <element signature="e#0#10#0" expanded="true" />
@@ -688,28 +658,25 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/ModelWindow.qml">
+    <entry file="file://$PROJECT_DIR$/shaders/OpenGL_4_1/vertex.glsl">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="263">
-          <caret line="48" column="46" lean-forward="false" selection-start-line="48" selection-start-column="46" selection-end-line="48" selection-end-column="46" />
-          <folding>
-            <element signature="e#0#8369#0" expanded="false" />
-            <marker date="1484640335252" expanded="false" signature="1354:8365" ph="..." />
-          </folding>
+        <state relative-caret-position="26">
+          <caret line="4" column="37" lean-forward="true" selection-start-line="4" selection-start-column="37" selection-end-line="4" selection-end-column="37" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/game_engine.py">
+    <entry file="file://$PROJECT_DIR$/shaders/OpenGL_4_1/fragment.glsl">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="26">
-          <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+        <state relative-caret-position="405">
+          <caret line="22" column="37" lean-forward="true" selection-start-line="22" selection-start-column="37" selection-end-line="22" selection-end-column="37" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/model.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="92">
+        <state relative-caret-position="119">
           <caret line="71" column="30" lean-forward="true" selection-start-line="71" selection-start-column="30" selection-end-line="71" selection-end-column="30" />
           <folding>
             <element signature="e#0#18#0" expanded="true" />
@@ -718,29 +685,39 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/render_engine.py">
+    <entry file="file://$PROJECT_DIR$/entity.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="226">
-          <caret line="111" column="52" lean-forward="true" selection-start-line="111" selection-start-column="52" selection-end-line="111" selection-end-column="52" />
+        <state relative-caret-position="613">
+          <caret line="101" column="21" lean-forward="true" selection-start-line="101" selection-start-column="21" selection-end-line="101" selection-end-column="21" />
           <folding>
-            <element signature="e#0#22#0" expanded="true" />
-            <element signature="e#375#1392#0" expanded="false" />
-            <element signature="e#1422#3432#0" expanded="false" />
-            <element signature="e#3456#3484#0" expanded="false" />
-            <element signature="e#3514#3527#0" expanded="false" />
-            <element signature="e#5314#5340#0" expanded="false" />
-            <element signature="e#5381#5660#0" expanded="false" />
-            <element signature="e#5698#5855#0" expanded="false" />
-            <element signature="e#5888#6016#0" expanded="false" />
-            <element signature="e#6056#6398#0" expanded="false" />
-            <element signature="e#6443#6447#0" expanded="false" />
-            <element signature="e#6480#6733#0" expanded="false" />
-            <element signature="e#6775#6779#0" expanded="false" />
-            <element signature="e#6826#6883#0" expanded="false" />
-            <element signature="e#6920#7649#0" expanded="false" />
-            <element signature="e#7690#7932#0" expanded="false" />
-            <element signature="e#7962#10102#0" expanded="false" />
-            <marker date="1484641285960" expanded="false" signature="2671:3301" ph="..." />
+            <element signature="e#0#12#0" expanded="true" />
+            <element signature="e#160#229#0" expanded="false" />
+            <element signature="e#250#279#0" expanded="false" />
+            <element signature="e#717#721#0" expanded="false" />
+            <element signature="e#872#992#0" expanded="false" />
+            <element signature="e#1042#1162#0" expanded="false" />
+            <element signature="e#1187#1299#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/utils.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="573">
+          <caret line="227" column="51" lean-forward="false" selection-start-line="227" selection-start-column="51" selection-end-line="227" selection-end-column="51" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#537#861#0" expanded="false" />
+            <element signature="e#918#1341#0" expanded="false" />
+            <element signature="e#1373#1394#0" expanded="false" />
+            <element signature="e#1422#1583#0" expanded="false" />
+            <element signature="e#1611#1772#0" expanded="false" />
+            <element signature="e#1800#1961#0" expanded="false" />
+            <element signature="e#1990#2078#0" expanded="false" />
+            <element signature="e#2107#2207#0" expanded="false" />
+            <element signature="e#2276#2468#0" expanded="false" />
+            <element signature="e#3396#3681#0" expanded="false" />
+            <element signature="e#4029#4535#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -755,36 +732,33 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/utils.py">
+    <entry file="file://$PROJECT_DIR$/game_engine.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1378">
-          <caret line="211" column="0" lean-forward="true" selection-start-line="211" selection-start-column="0" selection-end-line="211" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-            <element signature="e#236#500#0" expanded="false" />
-            <element signature="e#537#861#0" expanded="false" />
-            <element signature="e#918#1341#0" expanded="false" />
-            <element signature="e#1373#1394#0" expanded="false" />
-            <element signature="e#1422#1583#0" expanded="false" />
-            <element signature="e#1611#1772#0" expanded="false" />
-            <element signature="e#1800#1961#0" expanded="false" />
-            <element signature="e#1990#2078#0" expanded="false" />
-            <element signature="e#2107#2207#0" expanded="false" />
-            <element signature="e#2276#2468#0" expanded="false" />
-            <element signature="e#2499#3361#0" expanded="false" />
-            <element signature="e#3430#3715#0" expanded="false" />
-            <element signature="e#3787#3898#0" expanded="false" />
-            <element signature="e#3966#4042#0" expanded="false" />
-            <element signature="e#4074#4580#0" expanded="false" />
-          </folding>
+        <state relative-caret-position="26">
+          <caret line="1" column="0" lean-forward="true" selection-start-line="1" selection-start-column="0" selection-end-line="1" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/shaders/OpenGL_4_1/fragment.glsl">
+    <entry file="file://$PROJECT_DIR$/render_engine.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="274">
-          <caret line="19" column="0" lean-forward="true" selection-start-line="19" selection-start-column="0" selection-end-line="19" selection-end-column="0" />
-          <folding />
+        <state relative-caret-position="494">
+          <caret line="148" column="37" lean-forward="true" selection-start-line="148" selection-start-column="37" selection-end-line="148" selection-end-column="37" />
+          <folding>
+            <element signature="e#0#22#0" expanded="true" />
+            <element signature="e#6195#6221#0" expanded="false" />
+            <element signature="e#6262#6541#0" expanded="false" />
+            <element signature="e#6579#6736#0" expanded="false" />
+            <element signature="e#6769#6897#0" expanded="false" />
+            <element signature="e#7324#7328#0" expanded="false" />
+            <element signature="e#7361#7614#0" expanded="false" />
+            <element signature="e#7656#7660#0" expanded="false" />
+            <element signature="e#7707#7764#0" expanded="false" />
+            <element signature="e#7801#8530#0" expanded="false" />
+            <element signature="e#8571#8813#0" expanded="false" />
+            <element signature="e#8843#10983#0" expanded="false" />
+            <marker date="1484648718464" expanded="false" signature="2710:3340" ph="..." />
+          </folding>
         </state>
       </provider>
     </entry>

@@ -13,8 +13,8 @@ def perspective_projection ( fovy, aspect_ratio, near_z, far_z ):
 	m[0][0] = 1.0 / (aspect_ratio * t)
 	m[1][1] = 1.0 / t
 	m[2][2] = -(far_z + near_z) / (far_z - near_z)
-	m[2][3] = -1.0
-	m[3][2] = -(2.0 * far_z * near_z) / (far_z - near_z)
+	m[2][3] = -(2.0 * far_z * near_z) / (far_z - near_z)
+	m[3][2] = -1.0
 
 	return m
 
@@ -130,13 +130,11 @@ class MousePicker(object):
 		clip_coords_point = np.array([ndc_point[0], ndc_point[1], -1.0, 1.0])
 		view_coords_point = convert_to_eye_coords(clip_coords_point, self._projection_matrix)
 		world_coords_point = convert_to_world_coords(view_coords_point, self._camera.get_view_matrix())
-
 		ray = np.array([world_coords_point[0], world_coords_point[1], world_coords_point[2]])
 		ray = normalize_vector(ray)
 		return ray
 
 	def update_ray ( self, x, y, width, height ):
-		self._camera.get_view_matrix()
 		self.ray = self.compute_mouse_ray(x, y, width, height)
 
 
@@ -166,8 +164,7 @@ def convert_to_eye_coords ( clip_coords_point, projection_matrix ):
 
 def convert_to_world_coords ( view_coords_point, view_matrix ):
 	inv_mat = la.inv(view_matrix)
-	ret = inv_mat @ view_coords_point
-	return ret
+	return inv_mat @ view_coords_point
 
 
 def rotate ( angle, axis ):
@@ -211,11 +208,26 @@ def find_plane_point ( start_point, end_point ):
 	return np.array([x, 0.0, z])
 
 
-def find_coords_on_plane ( point ):
+def find_coords_on_plane ( point, length, rows, cols ):
 	"""
 	Check if point is in the check board plane,
 	return (row, col) if found, otherwise None
 	:param point: 3d point
 	:return: coords
 	"""
-	pass
+	for row in range(rows):  # y
+		for col in range(cols):  # x
+			position = np.array([col * length - length * cols / 2.0 + length / 2.0,
+			                     0.0,
+			                     row * length - length * rows / 2.0 + length / 2.0])
+
+			x_lo = position[0] - length / 2.0 + 0.1
+			x_hi = position[0] + length / 2.0 - 0.1
+
+			z_lo = position[2] - length / 2.0 + 0.1
+			z_hi = position[2] + length / 2.0 - 0.1
+
+			if (x_lo < point[0]) and (point[0] < x_hi) and (z_lo < point[2]) and (point[2] < z_hi):
+				return row, col
+
+	return None, None

@@ -17,7 +17,6 @@ void main () {
         float distance = length(to_light_vector[i]);
         vec3 normalized_to_light = normalize(to_light_vector[i]);
         float brightness = max(dot(normalized_normal, normalized_to_light), 0.0);
-
         total_diffuse += total_diffuse + brightness * light_color[i];
     }
 

@@ -34,6 +34,8 @@ class SceneRenderer(QObject):
 		self._entities = dict()
 		self._light_sources = []  # lighting
 
+		self._checker_board_entities = None
+
 		self._light_sources.append(Light('sun1',
 		                                 np.array([1000.0, 2000.0, 3000.0]),
 		                                 np.array([0.8, 0.8, 0.8])))
@@ -87,8 +89,7 @@ class SceneRenderer(QObject):
 		# 	scale = np.array([s, s, s])
 		# 	color = np.array([r, g, b])
 		# 	self._entities[CUBE_INDEX].append(Entity(self._models[CUBE_INDEX], position, rotation, scale, color))
-		checker_board_entities = self._entity_creator.create_checker_board()
-		self._entities[CUBE_INDEX].extend(checker_board_entities)
+		self._checker_board_entities = self._entity_creator.create_checker_board()
 
 	def sync ( self ):
 		self.set_projection_matrix()
@@ -104,7 +105,7 @@ class SceneRenderer(QObject):
 		h = self._window.height()
 
 		GL.glViewport(0, 0, w, h)
-		GL.glClearColor(0.8, 0.8, 0.8, 1)
+		GL.glClearColor(0.5, 0.5, 0.5, 1)
 		GL.glEnable(GL.GL_DEPTH_TEST)
 		GL.glClear(GL.GL_COLOR_BUFFER_BIT)
 		GL.glClear(GL.GL_DEPTH_BUFFER_BIT)
@@ -115,13 +116,42 @@ class SceneRenderer(QObject):
 		ray = self._mouse_picker.ray
 
 		plane_point = find_plane_point(self._camera.eye, self._camera.eye + ray * 500.0)
-		print(plane_point)
+		r, c = find_coords_on_plane(plane_point, 10.0, 8, 8)
 
 		self._shader.bind()
 		self._shader.setUniformValue('view_matrix',
 		                             QMatrix4x4(view_matrix.flatten().tolist()))
 		self._shader.setUniformValue('projection_matrix',
-		                             QMatrix4x4(self._projection_matrix.flatten().tolist()).transposed())
+		                             QMatrix4x4(self._projection_matrix.flatten().tolist()))
+
+		self.setup_model(self._models[CUBE_INDEX])
+		GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER,
+		                self._models[
+			                CUBE_INDEX].indices_vbo)  # [1] intel driver doesn't include this, must bind manually
+
+		for row in range(8):
+			for col in range(8):
+				e = self._checker_board_entities[row][col]
+				if r == row and c == col:
+					e.color[0] = 0.3
+					e.color[1] = 0.8
+					e.color[2] = 0.2
+				elif (row + col) % 2 == 0:
+					e.color[0] = 0.0
+					e.color[1] = 0.0
+					e.color[2] = 0.0
+				else:
+					e.color[0] = 1.0
+					e.color[1] = 1.0
+					e.color[2] = 1.0
+				self.setup_entity(e)
+				GL.glDrawElements(GL.GL_TRIANGLES,
+				                  self._models[CUBE_INDEX].num_indices,
+				                  GL.GL_UNSIGNED_INT,
+				                  None)  # [1]
+		GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)  # [1]
+		self.release_model()
+
 		for k, v in self._entities.items():
 			# create a transformation for every entity based on its pose
 			self.setup_model(self._models[k])
@@ -131,6 +161,7 @@ class SceneRenderer(QObject):
 
 			GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER,
 			                self._models[k].indices_vbo)  # [1] intel driver doesn't include this, must bind manually
+
 			for entity in v:
 				self.setup_entity(entity)
 				GL.glDrawElements(GL.GL_TRIANGLES,

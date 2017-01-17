@@ -46,7 +46,7 @@ Item {
         }
 
         onClicked: {
-            _window.set_mouse_position(mouse.x, mouse.x)
+            _window.set_mouse_position(mouse.x, mouse.y)
         }
 
         onPositionChanged: {
@@ -54,7 +54,7 @@ Item {
                 var delta = Qt.point(mouse.x - click_pos.x, mouse.y - click_pos.y);
                 _window.rotate_camera(delta.x, delta.y);
             }
-            _window.set_mouse_position(mouse.x, mouse.x)
+            _window.set_mouse_position(mouse.x, mouse.y)
         }
 
     }
