@@ -137,25 +137,25 @@ class SceneRenderer(QObject):
 
 		self._entity_creator = EntityCreator(self._models)
 
-		for i in range(100):
-			x = random.uniform(-30.0, 30.0)
-			y = random.uniform(-30.0, 30.0)
-			z = random.uniform(20.0, 20.0)
-			rx = random.uniform(-30.0, 30.0)
-			ry = random.uniform(-30.0, 30.0)
-			rz = random.uniform(-30.0, 30.0)
-			s = random.uniform(1.0, 5.0)
-			r = random.uniform(0.8, 1.0)
-			g = random.uniform(0.1, 0.5)
-			b = random.uniform(0.8, 1.0)
-
-			position = np.array([x, y, z])
-			rotation = np.array([rx, ry, rz])
-			scale = np.array([s, s, s])
-			color = np.array([r, g, b])
-			self._entities[CUBE_INDEX].append(Entity(self._models[CUBE_INDEX], position, rotation, scale, color))
-		# checker_board_entities = self._entity_creator.create_checker_board()
-		# self._entities[CUBE_INDEX].extend(checker_board_entities)
+		# for i in range(100):
+		# 	x = random.uniform(-30.0, 30.0)
+		# 	y = random.uniform(0.0, 5.0)
+		# 	z = random.uniform(-30.0, 30.0)
+		# 	rx = random.uniform(-30.0, 30.0)
+		# 	ry = random.uniform(-30.0, 30.0)
+		# 	rz = random.uniform(-30.0, 30.0)
+		# 	s = random.uniform(1.0, 5.0)
+		# 	r = random.uniform(0.8, 1.0)
+		# 	g = random.uniform(0.1, 0.5)
+		# 	b = random.uniform(0.8, 1.0)
+		#
+		# 	position = np.array([x, y, z])
+		# 	rotation = np.array([rx, ry, rz])
+		# 	scale = np.array([s, s, s])
+		# 	color = np.array([r, g, b])
+		# 	self._entities[CUBE_INDEX].append(Entity(self._models[CUBE_INDEX], position, rotation, scale, color))
+		checker_board_entities = self._entity_creator.create_checker_board()
+		self._entities[CUBE_INDEX].extend(checker_board_entities)
 
 	def sync ( self ):
 		self.set_projection_matrix()

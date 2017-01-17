@@ -23,9 +23,9 @@ class Camera(QObject):
 
 	def __init__ ( self, parent = None ):
 		super(Camera, self).__init__(parent)
-		self.eye = np.array([0.0, 5.0, -50.0])
+		self.eye = np.array([0.0, 40.0, -20.0])
 		self.up = np.array([0.0, 1.0, 0.0])
-		self.target = np.array([0.0, 0.0, 1.0])
+		self.target = np.array([0.0, -0.2, 0.8])
 		self.x = None
 		self.y = None
 		self.z = None
@@ -85,7 +85,7 @@ class EntityCreator(object):
 	def create_checker_board ( self, length = 10.0, rows = 10, cols = 10 ):
 		entities = []
 
-		y = -20.0
+		y = -0.2
 		width = length
 		height = length
 
@@ -94,11 +94,10 @@ class EntityCreator(object):
 
 		for row in range(rows):
 			for col in range(cols):
-				position = np.array([col - 5.0, y, row + 20.0])
-				rotation = np.array([45.0, 0.0, 0.0])
+				position = np.array([col * 10.0 - cols * 10.0 / 2 + 5.0, y, row * 10.0 + 10.0 * rows / 2 - 5.0])
+				rotation = np.array([0.0, 0.0, 0.0])
 				scale = np.array([10.0, 0.2, 10.0])
-				color = None
-				if col % 2 == 0:
+				if (col + row) % 2 == 0:
 					color = color_black
 				else:
 					color = color_white
