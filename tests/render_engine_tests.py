@@ -1,6 +1,6 @@
 import unittest
 
-from render_engine import MeshData
+from model import MeshData
 
 
 class MeshDataLoaderTest(unittest.TestCase):
