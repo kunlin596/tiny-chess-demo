@@ -38,15 +38,23 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-//        hoverEnabled: true
+
+        hoverEnabled: true
+
         onPressed: {
             click_pos = Qt.point(mouse.x,mouse.y)
         }
 
-        onPositionChanged: {
+        onClicked: {
             _window.set_mouse_position(mouse.x, mouse.x)
-            var delta = Qt.point(mouse.x - click_pos.x, mouse.y - click_pos.y)
-            _window.rotate_camera(delta.x, delta.y)
+        }
+
+        onPositionChanged: {
+            if (pressed) {
+                var delta = Qt.point(mouse.x - click_pos.x, mouse.y - click_pos.y);
+                _window.rotate_camera(delta.x, delta.y);
+            }
+            _window.set_mouse_position(mouse.x, mouse.x)
         }
 
     }

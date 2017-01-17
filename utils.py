@@ -103,9 +103,7 @@ def scale ( scale_vec ):
 	return m
 
 
-def create_transformation_matrix ( trans,
-                                   rotation,
-                                   scale_val ):
+def create_transformation_matrix ( trans, rotation, scale_val ):
 	m = np.identity(4)
 	m1 = scale(scale_val)
 	m2 = rotate_x(rotation[0])
@@ -194,6 +192,30 @@ def rotate ( angle, axis ):
 
 	m[2][0] = z * x * (1.0 - cos) - y * sin
 	m[2][1] = z * y * (1.0 - cos) + x * sin
-	m[2][2] = cos + z * z * (1.0- cos)
+	m[2][2] = cos + z * z * (1.0 - cos)
 
 	return m
+
+
+def find_plane_point ( start_point, end_point ):
+	"""
+	Find the coordinates on the checker board using binary search
+	:param start_point:
+	:param end_point:
+	:return:
+	"""
+	k = (0.0 - end_point[1]) / (end_point[1] - start_point[1])
+	x = k * (end_point[0] - start_point[0]) + end_point[0]
+	z = k * (end_point[2] - start_point[2]) + end_point[2]
+
+	return np.array([x, 0.0, z])
+
+
+def find_coords_on_plane ( point ):
+	"""
+	Check if point is in the check board plane,
+	return (row, col) if found, otherwise None
+	:param point: 3d point
+	:return: coords
+	"""
+	pass

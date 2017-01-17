@@ -1,9 +1,5 @@
-import random
-
 import OpenGL.GL as GL
-from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QMatrix4x4, QOpenGLShader, QOpenGLShaderProgram, QVector3D
-from PyQt5.QtQuick import QQuickView
 
 from entity import *
 from entity import EntityCreator
@@ -18,69 +14,6 @@ CUBE_INDEX = 0
 BUNNY_INDEX = 1
 
 
-class Shader(QOpenGLShaderProgram):
-	def __init__ ( self ):
-		super(Shader, self).__init__()
-
-
-class EditorView(QQuickView):
-	def __init__ ( self, parent = None ):
-		super(EditorView, self).__init__(parent)
-		self._renderer = None
-		self._camera = Camera()
-		self._renderer = SceneRenderer(self)
-
-		self.sceneGraphInitialized.connect(self.initialize_scene, type = Qt.DirectConnection)
-		self.beforeSynchronizing.connect(self.synchronize_scene, type = Qt.DirectConnection)
-		self.beforeRendering.connect(self.render_scene, type = Qt.DirectConnection)
-		self.sceneGraphInvalidated.connect(self.invalidate_scene, type = Qt.DirectConnection)
-
-		self.rootContext().setContextProperty("_camera", self._camera)
-		self.rootContext().setContextProperty("_window", self)
-
-		self.setClearBeforeRendering(False)  # otherwise quick would clear everything we render
-
-	def initialize_scene ( self ):
-		self._renderer.initialize()
-		self.resetOpenGLState()
-
-	def render_scene ( self ):
-		self._renderer.render()
-		self.resetOpenGLState()
-
-	def invalidate_scene ( self ):
-		self._renderer.invalidate()
-		self.resetOpenGLState()
-
-	def synchronize_scene ( self ):
-		self._renderer.sync()
-		self.resetOpenGLState()
-
-	@pyqtSlot(int)
-	def add_geometry ( self, geo_enum ):
-		self._renderer.add_geometry(geo_enum)
-
-	@pyqtSlot(int)
-	def delete_geometry ( self, index ):
-		self._renderer.delete_geometry(index)
-
-	@pyqtSlot(int)
-	def select_obj ( self, index = 0 ):
-		pass
-
-	@pyqtSlot(int, int)
-	def rotate_camera ( self, dx, dy ):
-		self._renderer.rotate_camera(dx, dy)
-
-	@pyqtSlot(int)
-	def move_camera ( self, key ):
-		self._renderer.move_camera(key)
-
-	@pyqtSlot(int, int)
-	def set_mouse_position ( self, x, y ):
-		self._renderer.update_mouse_position(x, y)
-
-
 class SceneRenderer(QObject):
 	def __init__ ( self, window = None, parent = None ):
 		super(SceneRenderer, self).__init__(parent)
@@ -91,7 +24,7 @@ class SceneRenderer(QObject):
 		self._entity_creator = None
 
 		self._model_matrix = np.identity(4)
-		self._projection_matrix = perspective_projection(45.0, 640.0 / 480.0, 0.001, 1000.0)
+		self._projection_matrix = perspective_projection(45.0, 640.0 / 480.0, 0.001, 500.0)
 		self._mouse_picker = MousePicker(self._camera,
 		                                 self._projection_matrix)
 
@@ -180,7 +113,9 @@ class SceneRenderer(QObject):
 
 		self._mouse_picker.update_ray(self._mouse_position[0], self._mouse_position[1], w, h)
 		ray = self._mouse_picker.ray
-		# print(ray)
+
+		plane_point = find_plane_point(self._camera.eye, self._camera.eye + ray * 500.0)
+		print(plane_point)
 
 		self._shader.bind()
 		self._shader.setUniformValue('view_matrix',
@@ -220,7 +155,7 @@ class SceneRenderer(QObject):
 		# Need to be set every time we change the size of the window
 		self._projection_matrix = perspective_projection(45.0,
 		                                                 self._window.width() / self._window.height(),
-		                                                 0.001, 1000.0)
+		                                                 0.001, 500.0)
 
 	def setup_model ( self, model ):
 		raw_model = model
@@ -279,7 +214,6 @@ class SceneRenderer(QObject):
 		self._camera.update_view_matrix()
 
 	def rotate_camera ( self, dx, dy ):
-
 		rate = 0.001
 		self._camera.target = rotate(-dx * rate, self._camera.up) @ self._camera.target
 		self._camera.target = rotate(dy * rate, np.cross(self._camera.up, self._camera.target)) @ self._camera.target
