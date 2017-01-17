@@ -2,7 +2,6 @@ import OpenGL.GL as GL
 from PyQt5.QtGui import QMatrix4x4, QOpenGLShader, QOpenGLShaderProgram, QVector3D
 
 from entity import *
-from entity import EntityCreator
 from model import *
 from utils import *
 
