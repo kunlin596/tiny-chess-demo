@@ -95,6 +95,10 @@ class EditorView(QQuickView):
 	def change_random_sphere_color ( self ):
 		self._renderer.change_random_sphere_color()
 
+	@pyqtSlot(int, int)
+	def set_mouse_position ( self, x, y ):
+		self._renderer.update_mouse_position(x, y)
+
 
 class SceneRenderer(QObject):
 	def __init__ ( self, window = None, parent = None ):
@@ -103,9 +107,12 @@ class SceneRenderer(QObject):
 		self._window = window
 		self._camera = Camera()
 		self._shader = None
+		self._entity_creator = None
 
 		self._model_matrix = np.identity(4)
 		self._projection_matrix = perspective_projection(45.0, 640.0 / 480.0, 0.001, 1000.0)
+		self._mouse_picker = MousePicker(self._camera,
+		                                 self._projection_matrix)
 
 		self._cpu_manager = GpuManager()  # load data onto gpu
 		self._mesh_data = dict()  # store all the raw mesh data
@@ -119,6 +126,8 @@ class SceneRenderer(QObject):
 		self._light_sources.append(Light('sun2',
 		                                 np.array([-1000.0, 2000.0, -3000.0]),
 		                                 np.array([0.4, 0.4, 0.4])))
+
+		self._mouse_position = np.array([0.0, 0.0])
 
 	def initialize ( self ):
 		self.set_projection_matrix()
@@ -145,8 +154,27 @@ class SceneRenderer(QObject):
 
 		self._shader.release()
 
+		self._entity_creator = EntityCreator(self._models)
+
 		for i in range(100):
-			self.add_geometry(0)
+			x = random.uniform(-30.0, 30.0)
+			y = random.uniform(-30.0, 30.0)
+			z = random.uniform(10.0, 20.0)
+			rx = random.uniform(-30.0, 30.0)
+			ry = random.uniform(-30.0, 30.0)
+			rz = random.uniform(-30.0, 30.0)
+			s = random.uniform(1.0, 5.0)
+			r = random.uniform(0.5, 1.0)
+			g = random.uniform(0.5, 1.0)
+			b = random.uniform(0.5, 1.0)
+
+			position = np.array([x, y, z])
+			rotation = np.array([rx, ry, rz])
+			scale = np.array([s, s, s])
+			color = np.array([r, g, b])
+			self._entities[CUBE_INDEX].append(Entity(self._models[CUBE_INDEX], position, rotation, scale, color))
+		# checker_board_entities = self._entity_creator.create_checker_board()
+		# self._entities[CUBE_INDEX].extend(checker_board_entities)
 
 	def sync ( self ):
 		self.set_projection_matrix()
@@ -168,6 +196,10 @@ class SceneRenderer(QObject):
 		GL.glClear(GL.GL_DEPTH_BUFFER_BIT)
 
 		view_matrix = self._camera.get_view_matrix()
+
+		self._mouse_picker.update_ray(self._mouse_position[0], self._mouse_position[1], w, h)
+		ray = self._mouse_picker.ray
+		# print(ray)
 
 		self._shader.bind()
 		self._shader.setUniformValue('view_matrix',
@@ -230,34 +262,6 @@ class SceneRenderer(QObject):
 		self._shader.setUniformValue('uniform_color', QVector3D(entity.color[0], entity.color[1], entity.color[2]))
 		self._shader.setUniformValue('model_matrix', QMatrix4x4(m.flatten().tolist()))
 
-	def add_geometry ( self, geo_enum ):
-		r = random.uniform(0.2, 0.8)
-		g = random.uniform(0.2, 0.8)
-		b = random.uniform(0.2, 0.8)
-		color = np.array([r, g, b])
-		if geo_enum == 0:
-			self._entities[CUBE_INDEX].append(Entity(self._models[CUBE_INDEX],
-			                                         np.array([random.uniform(-10.0, 10.0),
-			                                                   random.uniform(-10.0, 10.0),
-			                                                   random.uniform(-20.0, -10.0)]),
-			                                         np.array([random.uniform(-45.0, 45.0),
-			                                                   random.uniform(-45.0, 45.0),
-			                                                   random.uniform(-45.0, 45.0)]),
-			                                         np.array([1.0, 1.0, 1.0]),
-			                                         color))
-		elif geo_enum == 1:
-			self._entities[BUNNY_INDEX].append(Entity(self._models[BUNNY_INDEX],
-			                                          np.array([random.uniform(-10.0, 10.0),
-			                                                    random.uniform(-10.0, 10.0),
-			                                                    random.uniform(-20.0, -10.0)]),
-			                                          np.array([random.uniform(-30.0, 30.0),
-			                                                    random.uniform(-30.0, 30.0),
-			                                                    random.uniform(-30.0, 30.0)]),
-			                                          np.array([10.0, 10.0, 10.0]),
-			                                          color))
-		else:
-			return
-
 	def delete_geometry ( self, geo_enum ):
 		pass
 
@@ -266,6 +270,60 @@ class SceneRenderer(QObject):
 		self._shader.addShaderFromSourceFile(QOpenGLShader.Vertex, 'shaders/OpenGL_4_1/vertex.glsl')
 		self._shader.addShaderFromSourceFile(QOpenGLShader.Fragment, 'shaders/OpenGL_4_1/fragment.glsl')
 		self._shader.link()
+
+	def add_geometry ( self, geo_enum ):
+		pass
+
+	def update_mouse_position ( self, x, y ):
+		self._mouse_position[0] = x
+		self._mouse_position[1] = y
+
+
+class EntityCreator(object):
+	def __init__ ( self, models ):
+		self._models = models
+
+	def create_cube ( self, position, rotation, scale, color ):
+		return Entity(self._models['cube'],
+		              position,
+		              rotation,
+		              scale,
+		              color)
+
+	def create_bunny ( self, position, rotation, scale, color ):
+		return Entity(self._models['bunny'],
+		              position,
+		              rotation,
+		              scale,
+		              color)
+
+	def create_checker_board ( self, length = 10.0, rows = 10, cols = 10 ):
+		entities = []
+
+		y = -20.0
+		width = length
+		height = length
+
+		color_black = np.array([0.0, 0.0, 0.0])
+		color_white = np.array([1.0, 1.0, 1.0])
+
+		for row in range(rows):
+			for col in range(cols):
+				position = np.array([col - 5.0, y, row + 20.0])
+				rotation = np.array([45.0, 0.0, 0.0])
+				scale = np.array([10.0, 0.2, 10.0])
+				color = None
+				if col % 2 == 0:
+					color = color_black
+				else:
+					color = color_white
+				entities.append(Entity(self._models[CUBE_INDEX],
+				                       position,
+				                       rotation,
+				                       scale,
+				                       color))
+
+		return entities
 
 
 class GpuManager(object):
