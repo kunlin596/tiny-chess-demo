@@ -58,11 +58,13 @@ class RawModel(object):
 
 
 class Entity(object):
-	def __init__ ( self, model, position, rotation, scale ):
+	def __init__ ( self, model, position, rotation, scale, color ):
 		self.model = model
 		self.position = position
 		self.rotation = rotation
 		self.scale = scale
+		self.color = color
+
 
 class TexturedModel(object):
 	def __init__ ( self, raw_model = None, texture = None ):

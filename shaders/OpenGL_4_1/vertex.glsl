@@ -8,7 +8,7 @@ uniform mat4 model_matrix;
 uniform mat4 view_matrix;
 uniform mat4 projection_matrix;
 
-uniform float uniform_color;
+uniform vec3 uniform_color;
 uniform vec3 light_position[2];
 
 out vec3 to_light_vector[2];
@@ -19,7 +19,7 @@ void main () {
     vec4 world_position = model_matrix * vec4(position, 1.0);
     vec4 view_position = view_matrix * world_position;
     gl_Position = projection_matrix * view_position;
-    pass_color = color;
+    pass_color = uniform_color;
     for (int i = 0; i < 2; ++i) {
         to_light_vector[i] = light_position[i] - world_position.xyz;
     }

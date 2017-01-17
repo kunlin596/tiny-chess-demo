@@ -127,12 +127,14 @@ class SceneRenderer(QObject):
 		self._mesh_data[BUNNY_INDEX] = MeshData.ReadFromFile('mesh/bunny.obj', 'bunny')
 
 		self.create_shader()
-		# load all the mesh data into gpu
+
+		# Setup mesh data
 		self._shader.bind()
 		for k, v in self._mesh_data.items():
 			self._models[k] = self._cpu_manager.load_to_vao(v)
 			self._entities[k] = []
 
+		# Setup lighting
 		for i in range(len(self._light_sources)):
 			self._shader.setUniformValue('light_position[{}]'.format(i), QVector3D(self._light_sources[i].position[0],
 			                                                                       self._light_sources[i].position[1],
@@ -225,9 +227,14 @@ class SceneRenderer(QObject):
 		                                 entity.rotation,
 		                                 entity.scale)
 
+		self._shader.setUniformValue('uniform_color', QVector3D(entity.color[0], entity.color[1], entity.color[2]))
 		self._shader.setUniformValue('model_matrix', QMatrix4x4(m.flatten().tolist()))
 
 	def add_geometry ( self, geo_enum ):
+		r = random.uniform(0.2, 0.8)
+		g = random.uniform(0.2, 0.8)
+		b = random.uniform(0.2, 0.8)
+		color = np.array([r, g, b])
 		if geo_enum == 0:
 			self._entities[CUBE_INDEX].append(Entity(self._models[CUBE_INDEX],
 			                                         np.array([random.uniform(-10.0, 10.0),
@@ -236,7 +243,8 @@ class SceneRenderer(QObject):
 			                                         np.array([random.uniform(-45.0, 45.0),
 			                                                   random.uniform(-45.0, 45.0),
 			                                                   random.uniform(-45.0, 45.0)]),
-			                                         np.array([1.0, 1.0, 1.0])))
+			                                         np.array([1.0, 1.0, 1.0]),
+			                                         color))
 		elif geo_enum == 1:
 			self._entities[BUNNY_INDEX].append(Entity(self._models[BUNNY_INDEX],
 			                                          np.array([random.uniform(-10.0, 10.0),
@@ -245,7 +253,8 @@ class SceneRenderer(QObject):
 			                                          np.array([random.uniform(-30.0, 30.0),
 			                                                    random.uniform(-30.0, 30.0),
 			                                                    random.uniform(-30.0, 30.0)]),
-			                                          np.array([10.0, 10.0, 10.0])))
+			                                          np.array([10.0, 10.0, 10.0]),
+			                                          color))
 		else:
 			return
 
