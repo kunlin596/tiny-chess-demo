@@ -38,7 +38,7 @@ class MeshData(object):
 	def ReadFromFile ( cls, file_name, name = 'None' ):
 		scene = ai.load(file_name)
 		mesh = scene.meshes[0]
-		vertices = mesh.vertices
+		vertices = mesh.vertices - 0.5
 		indices = mesh.faces.flatten()  # make 1d for passing
 		colors = mesh.colors
 		normals = mesh.normals

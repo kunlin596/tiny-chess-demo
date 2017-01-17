@@ -2,12 +2,13 @@ import random
 
 import OpenGL.GL as GL
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QMatrix4x4, QVector3D, QOpenGLShader, QOpenGLShaderProgram
+from PyQt5.QtGui import QMatrix4x4, QOpenGLShader, QOpenGLShaderProgram, QVector3D
 from PyQt5.QtQuick import QQuickView
 
 from entity import *
-from utils import *
+from entity import EntityCreator
 from model import *
+from utils import *
 
 FLOAT_SIZE = 4
 DOUBLE_SIZE = 8
@@ -67,33 +68,13 @@ class EditorView(QQuickView):
 	def select_obj ( self, index = 0 ):
 		pass
 
-	@pyqtSlot(float)
-	def stretch_x ( self, x ):
-		pass
-
-	@pyqtSlot(float)
-	def stretch_y ( self, y ):
-		pass
-
-	@pyqtSlot(float)
-	def stretch_z ( self, z ):
-		pass
-
 	@pyqtSlot(int, int)
-	def rotate_obj ( self, x, y ):
-		pass
+	def rotate_camera ( self, dx, dy ):
+		self._rotate_camera(dx, dy)
 
-	@pyqtSlot(int, int)
-	def rotate_camera ( self, x, y ):
-		pass
-
-	@pyqtSlot()
-	def change_random_cube_color ( self ):
-		self._renderer.change_random_cube_color()
-
-	@pyqtSlot()
-	def change_random_sphere_color ( self ):
-		self._renderer.change_random_sphere_color()
+	@pyqtSlot(int)
+	def move_camera ( self, key ):
+		self._renderer.move_camera(key)
 
 	@pyqtSlot(int, int)
 	def set_mouse_position ( self, x, y ):
@@ -159,14 +140,14 @@ class SceneRenderer(QObject):
 		for i in range(100):
 			x = random.uniform(-30.0, 30.0)
 			y = random.uniform(-30.0, 30.0)
-			z = random.uniform(10.0, 20.0)
+			z = random.uniform(20.0, 20.0)
 			rx = random.uniform(-30.0, 30.0)
 			ry = random.uniform(-30.0, 30.0)
 			rz = random.uniform(-30.0, 30.0)
 			s = random.uniform(1.0, 5.0)
-			r = random.uniform(0.5, 1.0)
-			g = random.uniform(0.5, 1.0)
-			b = random.uniform(0.5, 1.0)
+			r = random.uniform(0.8, 1.0)
+			g = random.uniform(0.1, 0.5)
+			b = random.uniform(0.8, 1.0)
 
 			position = np.array([x, y, z])
 			rotation = np.array([rx, ry, rz])
@@ -278,52 +259,27 @@ class SceneRenderer(QObject):
 		self._mouse_position[0] = x
 		self._mouse_position[1] = y
 
+	def move_camera ( self, key ):
 
-class EntityCreator(object):
-	def __init__ ( self, models ):
-		self._models = models
+		vertical_direction = normalize_vector(np.cross(self._camera.up, self._camera.target))
+		head_direction = normalize_vector(np.cross(self._camera.target, vertical_direction))
 
-	def create_cube ( self, position, rotation, scale, color ):
-		return Entity(self._models['cube'],
-		              position,
-		              rotation,
-		              scale,
-		              color)
+		if key == Camera.Translation.FORWARD:
+			self._camera.eye += normalize_vector(self._camera.target)
+		elif key == Camera.Translation.BACKWARD:
+			self._camera.eye -= normalize_vector(self._camera.target)
+		elif key == Camera.Translation.LEFT:
+			self._camera.eye += vertical_direction
+		elif key == Camera.Translation.RIGHT:
+			self._camera.eye -= vertical_direction
+		elif key == Camera.Translation.UP:
+			self._camera.eye += head_direction
+		elif key == Camera.Translation.DOWN:
+			self._camera.eye -= head_direction
+		self._camera.update_view_matrix()
 
-	def create_bunny ( self, position, rotation, scale, color ):
-		return Entity(self._models['bunny'],
-		              position,
-		              rotation,
-		              scale,
-		              color)
-
-	def create_checker_board ( self, length = 10.0, rows = 10, cols = 10 ):
-		entities = []
-
-		y = -20.0
-		width = length
-		height = length
-
-		color_black = np.array([0.0, 0.0, 0.0])
-		color_white = np.array([1.0, 1.0, 1.0])
-
-		for row in range(rows):
-			for col in range(cols):
-				position = np.array([col - 5.0, y, row + 20.0])
-				rotation = np.array([45.0, 0.0, 0.0])
-				scale = np.array([10.0, 0.2, 10.0])
-				color = None
-				if col % 2 == 0:
-					color = color_black
-				else:
-					color = color_white
-				entities.append(Entity(self._models[CUBE_INDEX],
-				                       position,
-				                       rotation,
-				                       scale,
-				                       color))
-
-		return entities
+	def rotate_camera ( self, dx, dy ):
+		pass
 
 
 class GpuManager(object):

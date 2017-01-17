@@ -3,17 +3,45 @@ import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.0
 
 Item {
+
     id: root
     width: 640
     height: 480
 
+    focus: true
+
+    Keys.onPressed: {
+        switch(event.key) {
+            case Qt.Key_W:
+                _window.move_camera(4);
+                break;
+            case Qt.Key_S:
+                _window.move_camera(5);
+                break;
+            case Qt.Key_A:
+                _window.move_camera(0);
+                break;
+            case Qt.Key_D:
+                _window.move_camera(1);
+                break;
+            case Qt.Key_Space:
+            case Qt.Key_O:
+                _window.move_camera(2);
+                break;
+            case Qt.Key_P:
+                _window.move_camera(3);
+                break;
+        }
+    }
 
     MouseArea {
-    anchors.fill: parent
-        onClicked: {
+        anchors.fill: parent
+        hoverEnabled: true
+        onPositionChanged: {
             _window.set_mouse_position(mouseX, mouseY)
         }
     }
+
 
 //    Rectangle {
 //        id: rectangle

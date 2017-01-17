@@ -119,6 +119,8 @@ def create_transformation_matrix ( trans,
 
 
 class MousePicker(object):
+	MAX_TRIAL = 100
+
 	def __init__ ( self, camera, projection_matrix ):
 		self._projection_matrix = projection_matrix
 		self._camera = camera
