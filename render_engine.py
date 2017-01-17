@@ -70,7 +70,7 @@ class EditorView(QQuickView):
 
 	@pyqtSlot(int, int)
 	def rotate_camera ( self, dx, dy ):
-		self._rotate_camera(dx, dy)
+		self._renderer.rotate_camera(dx, dy)
 
 	@pyqtSlot(int)
 	def move_camera ( self, key ):
@@ -279,7 +279,11 @@ class SceneRenderer(QObject):
 		self._camera.update_view_matrix()
 
 	def rotate_camera ( self, dx, dy ):
-		pass
+
+		rate = 0.001
+		self._camera.target = rotate(-dx * rate, self._camera.up) @ self._camera.target
+		self._camera.target = rotate(dy * rate, np.cross(self._camera.up, self._camera.target)) @ self._camera.target
+		self._camera.update_view_matrix()
 
 
 class GpuManager(object):

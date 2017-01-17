@@ -7,6 +7,8 @@ Item {
     id: root
     width: 640
     height: 480
+    property variant click_pos: "0,0"
+
 
     focus: true
 
@@ -36,10 +38,17 @@ Item {
 
     MouseArea {
         anchors.fill: parent
-        hoverEnabled: true
-        onPositionChanged: {
-            _window.set_mouse_position(mouseX, mouseY)
+//        hoverEnabled: true
+        onPressed: {
+            click_pos = Qt.point(mouse.x,mouse.y)
         }
+
+        onPositionChanged: {
+            _window.set_mouse_position(mouse.x, mouse.x)
+            var delta = Qt.point(mouse.x - click_pos.x, mouse.y - click_pos.y)
+            _window.rotate_camera(delta.x, delta.y)
+        }
+
     }
 
 

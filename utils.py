@@ -170,3 +170,30 @@ def convert_to_world_coords ( view_coords_point, view_matrix ):
 	inv_mat = la.inv(view_matrix)
 	ret = inv_mat @ view_coords_point
 	return ret
+
+
+def rotate ( angle, axis ):
+	v = normalize_vector(axis)
+	t = np.radians(angle)
+
+	m = np.identity(3)
+	sin = np.sin(t)
+	cos = np.cos(t)
+
+	x = v[0]
+	y = v[1]
+	z = v[2]
+
+	m[0][0] = cos + x * x * (1.0 - cos)
+	m[0][1] = x * y * (1.0 - cos) - z * sin
+	m[0][2] = x * z * (1.0 - cos) + y * sin
+
+	m[1][0] = y * x * (1.0 - cos) + z * sin
+	m[1][1] = cos + y * y * (1.0 - cos)
+	m[1][2] = y * z * (1.0 - cos) - x * sin
+
+	m[2][0] = z * x * (1.0 - cos) - y * sin
+	m[2][1] = z * y * (1.0 - cos) + x * sin
+	m[2][2] = cos + z * z * (1.0- cos)
+
+	return m
