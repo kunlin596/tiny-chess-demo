@@ -14,6 +14,7 @@ uniform vec3 light_position[2];
 out vec3 to_light_vector[2];
 out vec3 pass_color;
 out vec3 surface_normal_vector;
+out vec3 to_camera_vector;
 
 void main () {
     vec4 world_position = model_matrix * vec4(position, 1.0);
@@ -25,6 +26,6 @@ void main () {
     }
 
     surface_normal_vector = (model_matrix * vec4(normal, 0.0)).xyz;
-
+    to_camera_vector= (inverse(view_matrix) * vec4(0.0, 0.0, 0.0, 1.0)).xyz - world_position.xyz;
 //    pass_color = vec3(uniform_color, uniform_color, uniform_color);
 }

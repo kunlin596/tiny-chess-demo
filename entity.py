@@ -96,7 +96,7 @@ class EntityCreator(object):
 					 y,
 					 row * length - rows * length / 2.0 + length / 2.0])
 				rotation = np.array([0.0, 0.0, 0.0])
-				scale = np.array([10.0, 0.5, 10.0])
+				scale = np.array([9.0, 0.5, 9.0])
 				if (col + row) % 2 == 0:
 					color = color_black.copy()
 				else:
@@ -106,7 +106,5 @@ class EntityCreator(object):
 				                       rotation,
 				                       scale,
 				                       color))
-			print(len(r))
 			entities.append(r)
-		print(len(entities))
 		return entities
