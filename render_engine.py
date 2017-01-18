@@ -10,23 +10,22 @@ FLOAT_SIZE = 4
 DOUBLE_SIZE = 8
 UNSIGNED_INT_SIZE = 4
 
-CUBE_INDEX = 0
+CUBE_MODEL_INDEX = 0
 BUNNY_INDEX = 1
 
 
 class SceneRenderer(QObject):
-	def __init__ ( self, window = None, parent = None ):
+	def __init__ ( self, window = None, camera = None, parent = None ):
 		super(SceneRenderer, self).__init__(parent)
 
 		self._window = window
-		self._camera = Camera()
+		self._camera = camera
 		self._shader = None
 		self._entity_creator = None
 
 		self._camera.update_projection_matrix(640.0, 480.0)
 
 		self._model_matrix = np.identity(4)
-		self._mouse_picker = MousePicker(self._camera)
 
 		self._cpu_manager = GpuManager()  # load data onto gpu
 		self._mesh_data = dict()  # store all the raw mesh data
@@ -34,27 +33,26 @@ class SceneRenderer(QObject):
 		self._entities = dict()
 		self._light_sources = []  # lighting
 
-		self._checker_board_entities = ModelEntityList()
+		self._board_entities = ModelEntityList()
+		# self._piece_entities = ModelEntityList()
+		self._piece_entities = dict()
 
 		self._light_sources.append(Light('sun1',
 		                                 np.array([1000.0, 2000.0, 3000.0]),
-		                                 np.array([0.8, 0.8, 0.8])))
+		                                 np.array([0.7, 0.7, 0.7])))
 		self._light_sources.append(Light('sun2',
 		                                 np.array([-1000.0, 2000.0, -3000.0]),
-		                                 np.array([0.4, 0.4, 0.4])))
+		                                 np.array([0.6, 0.6, 0.6])))
 
 		self._mouse_position = np.array([0.0, 0.0])
-
-	def checker_board_entities ( self ):
-		return self._checker_board_entities
 
 	def initialize ( self ):
 
 		self.set_viewport_size(self._window.size() * self._window.devicePixelRatio())
-		self._mesh_data[CUBE_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'cube')
+		self._mesh_data[CUBE_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'cube')
 		self._mesh_data[BUNNY_INDEX] = MeshData.ReadFromFile('mesh/bunny.obj', 'bunny')
 
-		MeshData.CheckData(self._mesh_data[CUBE_INDEX])
+		MeshData.CheckData(self._mesh_data[CUBE_MODEL_INDEX])
 		MeshData.CheckData(self._mesh_data[BUNNY_INDEX])
 
 		self.create_shader()
@@ -81,14 +79,56 @@ class SceneRenderer(QObject):
 		self._shader.release()
 
 		self._entity_creator = EntityCreator(self._models)
-		self._entity_creator.create_checker_board(self._checker_board_entities)
+		self._entity_creator.create_checker_board(self._board_entities)
 
 	def sync ( self ):
 		self._camera.update_projection_matrix(self._window.width(), self._window.height())
+		self._shader.bind()
+		self._shader.setUniformValue('projection_matrix',
+		                             QMatrix4x4(self._camera.get_projection_matrix().flatten().tolist()))
+		self._shader.release()
 
 	def invalidate ( self ):
 		# TODO
 		pass
+
+	def prepare_board_table ( self, board_table ):
+		for row in range(8):
+			for col in range(8):
+				e = self._board_entities[col + 8 * row]
+				if board_table[row][col] > 0.0:
+					e.color[0] = 0.3
+					e.color[1] = 0.8
+					e.color[2] = 0.2
+				else:
+					if (row + col) % 2 == 0:
+						e.color[0] = 0.0
+						e.color[1] = 0.0
+						e.color[2] = 0.0
+					else:
+						e.color[0] = 1.0
+						e.color[1] = 1.0
+						e.color[2] = 1.0
+
+	def prepare_piece_table ( self, piece_table ):
+		for row in range(8):
+			for col in range(8):
+				if piece_table[row][col] > 0:
+					position = self._board_entities[col + 8 * row].position.copy()
+					position[1] = self._board_entities[col + 8 * row].position[1] + 6.0
+					rotation = np.array([0.0, 0.0, 0.0])
+					scale = np.array([9.0, 9.0, 9.0])
+
+					e = ModelEntity()
+					e.model = self._models[CUBE_INDEX]
+					e.position = position
+					e.rotation = rotation
+					e.scale = scale
+					e.color = np.array([0.2, 0.8, 0.6])
+					self._piece_entities[(row, col)] = e
+				else:
+					if (row, col) in self._piece_entities.keys():
+						self._piece_entities.pop((row, col))
 
 	def render ( self ):
 
@@ -106,65 +146,34 @@ class SceneRenderer(QObject):
 
 		view_matrix = self._camera.get_view_matrix()
 
-		self._mouse_picker.update_ray(self._mouse_position[0], self._mouse_position[1], w, h)
-		plane_point = find_plane_point(self._camera.eye, self._camera.eye + self._mouse_picker.ray * 500.0)
-		r, c = find_coords_on_plane(plane_point, 10.0, 8, 8)
-
 		self._shader.bind()
 		self._shader.setUniformValue('view_matrix',
 		                             QMatrix4x4(view_matrix.flatten().tolist()))
 
-		self.setup_model(self._models[CUBE_INDEX])
+		self.setup_model(self._models[CUBE_MODEL_INDEX])
 		GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER,
 		                self._models[
-			                CUBE_INDEX].indices_vbo)  # [1] intel driver doesn't include this, must bind manually
+			                CUBE_MODEL_INDEX].indices_vbo)  # [1] intel driver doesn't include this, must bind manually
 
 		for row in range(8):
 			for col in range(8):
-				e = self._checker_board_entities[col + 8 * row]
-				if r == row and c == col:
-					e.color[0] = 0.3
-					e.color[1] = 0.8
-					e.color[2] = 0.2
-				else:
-					if (row + col) % 2 == 0:
-						e.color[0] = 0.0
-						e.color[1] = 0.0
-						e.color[2] = 0.0
-					else:
-						e.color[0] = 1.0
-						e.color[1] = 1.0
-						e.color[2] = 1.0
-
+				e = self._board_entities[col + 8 * row]
 				self.setup_entity(e)
 				GL.glDrawElements(GL.GL_TRIANGLES,
-				                  self._models[CUBE_INDEX].num_indices,
+				                  self._models[CUBE_MODEL_INDEX].num_indices,
 				                  GL.GL_UNSIGNED_INT,
 				                  None)  # [1]
+
+		for k, v in self._piece_entities.items():
+			self.setup_entity(v)
+			GL.glDrawElements(GL.GL_TRIANGLES,
+			                  self._models[CUBE_MODEL_INDEX].num_indices,
+			                  GL.GL_UNSIGNED_INT,
+			                  None)  # [1]
+
 		GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)  # [1]
+
 		self.release_model()
-
-		for k, v in self._entities.items():
-			# create a transformation for every entity based on its pose
-			self.setup_model(self._models[k])
-
-			# [1] is paired for draw elements
-			# [2] is draw simple array
-
-			GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER,
-			                self._models[k].indices_vbo)  # [1] intel driver doesn't include this, must bind manually
-
-			for entity in v:
-				self.setup_entity(entity)
-				GL.glDrawElements(GL.GL_TRIANGLES,
-				                  self._models[k].num_indices,
-				                  GL.GL_UNSIGNED_INT,
-				                  None)  # [1]
-			GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)  # [1]
-			# GL.glDrawArrays(GL.GL_TRIANGLES,
-			#                 0,
-			#                 self._models[k].num_indices) # [2]
-			self.release_model()
 
 		self._shader.release()
 
@@ -195,17 +204,11 @@ class SceneRenderer(QObject):
 		self._shader.setUniformValue('uniform_color', QVector3D(entity.color[0], entity.color[1], entity.color[2]))
 		self._shader.setUniformValue('model_matrix', QMatrix4x4(m.flatten().tolist()))
 
-	def delete_geometry ( self, geo_enum ):
-		pass
-
 	def create_shader ( self ):
 		self._shader = QOpenGLShaderProgram()
 		self._shader.addShaderFromSourceFile(QOpenGLShader.Vertex, 'shaders/OpenGL_4_1/vertex.glsl')
 		self._shader.addShaderFromSourceFile(QOpenGLShader.Fragment, 'shaders/OpenGL_4_1/fragment.glsl')
 		self._shader.link()
-
-	def add_geometry ( self, geo_enum ):
-		pass
 
 	def update_mouse_position ( self, x, y ):
 		self._mouse_position[0] = x
@@ -235,6 +238,9 @@ class SceneRenderer(QObject):
 		self._camera.target = rotate(-dx * rate, self._camera.up) @ self._camera.target
 		self._camera.target = rotate(dy * rate, np.cross(self._camera.up, self._camera.target)) @ self._camera.target
 		self._camera.update_view_matrix()
+
+	def checker_board_entities ( self ):
+		return self._board_entities
 
 
 class GpuManager(object):

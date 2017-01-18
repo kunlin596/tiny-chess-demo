@@ -1,8 +1,5 @@
 import numpy as np
 import numpy.linalg as la
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, pyqtProperty
-from PyQt5.QtQml import QQmlListProperty
-import math
 
 
 def perspective_projection ( fovy, aspect_ratio, near_z, far_z ):
@@ -114,27 +111,6 @@ def create_transformation_matrix ( trans, rotation, scale_val ):
 	m = m5 @ m4 @ m3 @ m2 @ m1 @ m
 
 	return m
-
-
-class MousePicker(object):
-	MAX_TRIAL = 100
-
-	def __init__ ( self, camera ):
-		self._camera = camera
-		self._view_matrix = self._camera.get_view_matrix()
-		self.ray = None
-
-	def compute_mouse_ray ( self, x, y, width, height ):
-		ndc_point = convert_to_normalized_device_coords(x, y, width, height)
-		clip_coords_point = np.array([ndc_point[0], ndc_point[1], -1.0, 1.0])
-		view_coords_point = convert_to_eye_coords(clip_coords_point, self._camera.get_projection_matrix())
-		world_coords_point = convert_to_world_coords(view_coords_point, self._camera.get_view_matrix())
-		ray = np.array([world_coords_point[0], world_coords_point[1], world_coords_point[2]])
-		ray = normalize_vector(ray)
-		return ray
-
-	def update_ray ( self, x, y, width, height ):
-		self.ray = self.compute_mouse_ray(x, y, width, height)
 
 
 def convert_to_normalized_device_coords ( x, y, width, height ):

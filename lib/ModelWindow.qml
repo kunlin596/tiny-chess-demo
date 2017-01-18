@@ -40,6 +40,8 @@ Item {
     MouseArea {
         anchors.fill: parent
 
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+
         hoverEnabled: true
 
         onPressed: {
@@ -47,7 +49,11 @@ Item {
         }
 
         onClicked: {
-            _window.on_clicked(mouse.x, mouse.y);
+            if (mouse.button == Qt.LeftButton) {
+                _window.on_clicked(0, mouse.x, mouse.y);
+            } else if (mouse.button == Qt.RightButton) {
+                _window.on_clicked(1, mouse.x, mouse.y);
+            }
             _window.set_mouse_position(mouse.x, mouse.y);
         }
 
@@ -58,6 +64,7 @@ Item {
                 // Disable mouse picking for
                 _window.set_mouse_position(-100.0, -100.0);
             } else {
+                _window.on_hover(mouse.x, mouse.y);
                 _window.set_mouse_position(mouse.x, mouse.y);
             }
         }

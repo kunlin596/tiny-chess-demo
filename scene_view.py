@@ -1,8 +1,9 @@
 from PyQt5.QtCore import Qt, pyqtSlot
 from PyQt5.QtQuick import QQuickView
 
-from entity import Camera
+from entity import *
 from render_engine import SceneRenderer
+from game_engine import GameEngine
 
 from model import ModelEntity, ModelEntityList
 
@@ -12,7 +13,8 @@ class EditorView(QQuickView):
 		super(EditorView, self).__init__(parent)
 		self._renderer = None
 		self._camera = Camera()
-		self._renderer = SceneRenderer(self)
+		self._renderer = SceneRenderer(self, self._camera)
+		self._game = GameEngine(self, self._camera)
 
 		self.sceneGraphInitialized.connect(self.initialize_scene, type = Qt.DirectConnection)
 		self.beforeSynchronizing.connect(self.synchronize_scene, type = Qt.DirectConnection)
@@ -21,7 +23,7 @@ class EditorView(QQuickView):
 
 		self.rootContext().setContextProperty("_camera", self._camera)
 		self.rootContext().setContextProperty("_window", self)
-		self.rootContext().setContextProperty("_checker_board_entities", self._renderer._checker_board_entities)
+		self.rootContext().setContextProperty("_checker_board_entities", self._renderer._board_entities)
 
 		self.setClearBeforeRendering(False)  # otherwise quick would clear everything we render
 
@@ -30,6 +32,8 @@ class EditorView(QQuickView):
 		self.resetOpenGLState()
 
 	def render_scene ( self ):
+		self._renderer.prepare_board_table(self._game.board_table())
+		self._renderer.prepare_piece_table(self._game.piece_table())
 		self._renderer.render()
 		self.resetOpenGLState()
 
@@ -66,5 +70,9 @@ class EditorView(QQuickView):
 		self._renderer.update_mouse_position(x, y)
 
 	@pyqtSlot(int, int)
-	def on_clicked ( self, x, y ):
-		pass
+	def on_hover ( self, x, y ):
+		self._game.on_mouse_move(x, y)
+
+	@pyqtSlot(int, int, int)
+	def on_clicked ( self, button, x, y ):
+		self._game.on_clicked(button, x, y)

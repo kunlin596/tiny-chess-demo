@@ -1,4 +1,6 @@
+import numpy as np
 from utils import *
+from PyQt5.QtCore import QObject, pyqtSlot
 
 CUBE_INDEX = 0
 BUNNY_INDEX = 1
@@ -62,3 +64,23 @@ class Light(object):
 		self.name = name
 		self.position = position
 		self.color = color
+
+
+class MousePicker(object):
+
+	def __init__ ( self, camera ):
+		self._camera = camera
+		self._view_matrix = self._camera.get_view_matrix()
+		self.ray = None
+
+	def compute_mouse_ray ( self, x, y, width, height ):
+		ndc_point = convert_to_normalized_device_coords(x, y, width, height)
+		clip_coords_point = np.array([ndc_point[0], ndc_point[1], -1.0, 1.0])
+		view_coords_point = convert_to_eye_coords(clip_coords_point, self._camera.get_projection_matrix())
+		world_coords_point = convert_to_world_coords(view_coords_point, self._camera.get_view_matrix())
+		ray = np.array([world_coords_point[0], world_coords_point[1], world_coords_point[2]])
+		ray = normalize_vector(ray)
+		return ray
+
+	def update_ray ( self, x, y, width, height ):
+		self.ray = self.compute_mouse_ray(x, y, width, height)
