@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9c6112ad-563d-4ac9-919a-6e036a8f30a3" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/3d-editor.iml" afterPath="$PROJECT_DIR$/.idea/3d-editor.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/misc.xml" afterPath="$PROJECT_DIR$/.idea/misc.xml" />
+    <list default="true" id="9c6112ad-563d-4ac9-919a-6e036a8f30a3" name="Default" comment="Renamed some variables.">
+      <change type="MOVED" beforePath="$PROJECT_DIR$/lib/Button.qml" afterPath="$PROJECT_DIR$/qml/Button.qml" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/lib/CameraControls.qml" afterPath="$PROJECT_DIR$/qml/CameraControls.qml" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/lib/Entity.qml" afterPath="$PROJECT_DIR$/qml/Entity.qml" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/lib/EntityList.qml" afterPath="$PROJECT_DIR$/qml/EntityList.qml" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/lib/ModelWindow.qml" afterPath="$PROJECT_DIR$/qml/ModelWindow.qml" />
+      <change type="MOVED" beforePath="$PROJECT_DIR$/lib/componentCreation.js" afterPath="$PROJECT_DIR$/qml/componentCreation.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/entity.py" afterPath="$PROJECT_DIR$/entity.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/game_engine.py" afterPath="$PROJECT_DIR$/game_engine.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/ModelWindow.qml" afterPath="$PROJECT_DIR$/lib/ModelWindow.qml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/render_engine.py" afterPath="$PROJECT_DIR$/render_engine.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scene_view.py" afterPath="$PROJECT_DIR$/scene_view.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/utils.py" afterPath="$PROJECT_DIR$/utils.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/main.py" afterPath="$PROJECT_DIR$/main.py" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -24,14 +23,14 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FileEditorManager">
-    <splitter split-orientation="horizontal" split-proportion="0.47776365">
+    <splitter split-orientation="horizontal" split-proportion="0.68614995">
       <split-first>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="render_engine.py" pinned="false" current-in-tab="false">
+          <file leaf-file-name="render_engine.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/render_engine.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="454">
-                  <caret line="129" column="0" lean-forward="false" selection-start-line="129" selection-start-column="0" selection-end-line="129" selection-end-column="0" />
+                <state relative-caret-position="442">
+                  <caret line="176" column="0" lean-forward="true" selection-start-line="176" selection-start-column="0" selection-end-line="176" selection-end-column="0" />
                   <folding>
                     <element signature="e#0#22#0" expanded="true" />
                     <element signature="e#1411#3068#0" expanded="false" />
@@ -58,28 +57,11 @@
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="scene_view.py" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/scene_view.py">
+          <file leaf-file-name="ModelWindow.qml" pinned="false" current-in-tab="false">
+            <entry file="file://$PROJECT_DIR$/qml/ModelWindow.qml">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="470">
-                  <caret line="73" column="34" lean-forward="false" selection-start-line="73" selection-start-column="34" selection-end-line="73" selection-end-column="34" />
-                  <folding>
-                    <element signature="e#0#37#0" expanded="true" />
-                    <element signature="e#293#1137#0" expanded="false" />
-                    <element signature="e#1173#1226#0" expanded="false" />
-                    <element signature="e#1469#1522#0" expanded="false" />
-                    <element signature="e#1559#1606#0" expanded="false" />
-                    <element signature="e#1664#1701#0" expanded="false" />
-                  </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="ModelWindow.qml" pinned="false" current-in-tab="true">
-            <entry file="file://$PROJECT_DIR$/lib/ModelWindow.qml">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="269">
-                  <caret line="50" column="20" lean-forward="true" selection-start-line="50" selection-start-column="20" selection-end-line="50" selection-end-column="20" />
+                <state relative-caret-position="364">
+                  <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
                   <folding>
                     <marker date="1484732098716" expanded="false" signature="1901:8912" ph="..." />
                   </folding>
@@ -91,21 +73,21 @@
       </split-first>
       <split-second>
         <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-          <file leaf-file-name="main.py" pinned="false" current-in-tab="false">
+          <file leaf-file-name="main.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/main.py">
               <provider selected="true" editor-type-id="text-editor">
                 <state relative-caret-position="156">
-                  <caret line="14" column="25" lean-forward="true" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
+                  <caret line="14" column="25" lean-forward="false" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
                   <folding />
                 </state>
               </provider>
             </entry>
           </file>
-          <file leaf-file-name="game_engine.py" pinned="false" current-in-tab="true">
+          <file leaf-file-name="game_engine.py" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/game_engine.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="295">
-                  <caret line="34" column="0" lean-forward="false" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
+                <state relative-caret-position="425">
+                  <caret line="38" column="65" lean-forward="false" selection-start-line="38" selection-start-column="65" selection-end-line="38" selection-end-column="65" />
                   <folding>
                     <element signature="e#0#18#0" expanded="true" />
                     <element signature="e#69#207#1" expanded="false" />
@@ -226,9 +208,9 @@
         <option value="$PROJECT_DIR$/utils.py" />
         <option value="$PROJECT_DIR$/entity.py" />
         <option value="$PROJECT_DIR$/render_engine.py" />
-        <option value="$PROJECT_DIR$/game_engine.py" />
         <option value="$PROJECT_DIR$/scene_view.py" />
         <option value="$PROJECT_DIR$/lib/ModelWindow.qml" />
+        <option value="$PROJECT_DIR$/game_engine.py" />
       </list>
     </option>
   </component>
@@ -262,48 +244,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="3d-editor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3d-editor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3d-editor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tests" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3d-editor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3d-editor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="mesh" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3d-editor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="3d-editor" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="lib" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -667,7 +607,21 @@
       <option name="project" value="LOCAL" />
       <updated>1484727531330</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Implemented add and delete cube on the chess board in clicked row and col.">
+      <created>1484732140293</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1484732140293</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Implemented add and delete cube on the chess board in clicked row and col.">
+      <created>1484732664166</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1484732664166</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TodoView">
@@ -733,7 +687,8 @@
     <MESSAGE value="Implemented find checker board square world coord feature." />
     <MESSAGE value="Implemented find checker board square selection." />
     <MESSAGE value="Revised Camera class, put projection matrix into camera. &#10;Figured out how to integrated qml and python class, and access python property in qml." />
-    <option name="LAST_COMMIT_MESSAGE" value="Revised Camera class, put projection matrix into camera. &#10;Figured out how to integrated qml and python class, and access python property in qml." />
+    <MESSAGE value="Implemented add and delete cube on the chess board in clicked row and col." />
+    <option name="LAST_COMMIT_MESSAGE" value="Implemented add and delete cube on the chess board in clicked row and col." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -937,7 +892,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/EntityList.qml">
+    <entry file="file://$PROJECT_DIR$/qml/EntityList.qml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="52">
           <caret line="2" column="7" lean-forward="false" selection-start-line="2" selection-start-column="7" selection-end-line="2" selection-end-column="7" />
@@ -945,7 +900,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/componentCreation.js">
+    <entry file="file://$PROJECT_DIR$/qml/componentCreation.js">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="0">
           <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="2" selection-end-line="30" selection-end-column="3" />
@@ -953,18 +908,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/Entity.qml">
+    <entry file="file://$PROJECT_DIR$/qml/Entity.qml">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="182">
           <caret line="7" column="1" lean-forward="true" selection-start-line="7" selection-start-column="0" selection-end-line="7" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/main.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="156">
-          <caret line="14" column="25" lean-forward="true" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
           <folding />
         </state>
       </provider>
@@ -1037,13 +984,12 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/game_engine.py">
+    <entry file="file://$PROJECT_DIR$/qml/ModelWindow.qml">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="295">
-          <caret line="34" column="0" lean-forward="false" selection-start-line="34" selection-start-column="0" selection-end-line="34" selection-end-column="0" />
+        <state relative-caret-position="364">
+          <caret line="14" column="0" lean-forward="true" selection-start-line="14" selection-start-column="0" selection-end-line="14" selection-end-column="0" />
           <folding>
-            <element signature="e#0#18#0" expanded="true" />
-            <element signature="e#69#207#1" expanded="false" />
+            <marker date="1484732098716" expanded="false" signature="1901:8912" ph="..." />
           </folding>
         </state>
       </provider>
@@ -1063,10 +1009,29 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/game_engine.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="425">
+          <caret line="38" column="65" lean-forward="false" selection-start-line="38" selection-start-column="65" selection-end-line="38" selection-end-column="65" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+            <element signature="e#69#207#1" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/main.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="156">
+          <caret line="14" column="25" lean-forward="false" selection-start-line="14" selection-start-column="25" selection-end-line="14" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/render_engine.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="454">
-          <caret line="129" column="0" lean-forward="false" selection-start-line="129" selection-start-column="0" selection-end-line="129" selection-end-column="0" />
+        <state relative-caret-position="442">
+          <caret line="176" column="0" lean-forward="true" selection-start-line="176" selection-start-column="0" selection-end-line="176" selection-end-column="0" />
           <folding>
             <element signature="e#0#22#0" expanded="true" />
             <element signature="e#1411#3068#0" expanded="false" />
@@ -1088,16 +1053,6 @@
             <element signature="e#10077#10400#0" expanded="false" />
             <element signature="e#10431#10527#0" expanded="false" />
             <marker date="1484731779088" expanded="false" signature="4550:4880" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/ModelWindow.qml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="269">
-          <caret line="50" column="20" lean-forward="true" selection-start-line="50" selection-start-column="20" selection-end-line="50" selection-end-column="20" />
-          <folding>
-            <marker date="1484732098716" expanded="false" signature="1901:8912" ph="..." />
           </folding>
         </state>
       </provider>

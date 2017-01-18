@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
 	view = EditorView()
 	view.setResizeMode(QQuickView.SizeRootObjectToView)  # Set for the object to resize correctly
-	view.setSource(QUrl('lib/ModelWindow.qml'))
+	view.setSource(QUrl('qml/ModelWindow.qml'))
 	view.show()
 
 	app.exec()
