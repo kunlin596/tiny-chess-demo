@@ -19,11 +19,12 @@ class Camera(QObject):
 		Vertical = 0
 		Horizontal = 1
 
-	def __init__ ( self, parent = None ):
+	def __init__ (self, parent = None):
 		super(Camera, self).__init__(parent)
-		self.eye = np.array([-60.0, 40.0, -60.0])
+
+		self.eye = np.array([-35.88407358, 83.68050208, -69.64410608])
 		self.up = np.array([0.0, 1.0, 0.0])
-		self.target = np.array([0.6, -0.4, 0.6])
+		self.target = np.array([0.2827449, -0.74757148, 0.49111322])
 		self.x = None
 		self.y = None
 		self.z = None
@@ -34,46 +35,45 @@ class Camera(QObject):
 		self._projection_matrix = np.identity(4)
 		self.update_view_matrix()
 
-	def get_view_matrix ( self ):
+	def get_view_matrix (self):
 		return self._view_matrix
 
-	def get_projection_matrix ( self ):
+	def get_projection_matrix (self):
 		return self._projection_matrix
 
-	def update_view_matrix ( self ):
+	def update_view_matrix (self):
 		self._view_matrix = look_at(self.eye, self.eye + self.target, self.up)
 
-	def update_projection_matrix ( self, w, h ):
+	def update_projection_matrix (self, w, h):
 		self._projection_matrix = perspective_projection(45.0, w / h, 0.001, 500.0)
 
 	@pyqtSlot(float)
-	def translate ( self, dist ):
+	def translate (self, dist):
 		self.eye += dist * normalize_vector(self.x)
 		self.target += dist * normalize_vector(self.x)
 		self.update_view_matrix()
 
 	@pyqtSlot(float)
-	def rotate ( self, dist ):
+	def rotate (self, dist):
 		self.eye += dist * normalize_vector(self.y)
 		self.target += dist * normalize_vector(self.y)
 		self.update_view_matrix()
 
 
 class Light(object):
-	def __init__ ( self, name, position, color ):
+	def __init__ (self, name, position, color):
 		self.name = name
 		self.position = position
 		self.color = color
 
 
 class MousePicker(object):
-
-	def __init__ ( self, camera ):
+	def __init__ (self, camera):
 		self._camera = camera
 		self._view_matrix = self._camera.get_view_matrix()
 		self.ray = None
 
-	def compute_mouse_ray ( self, x, y, width, height ):
+	def compute_mouse_ray (self, x, y, width, height):
 		ndc_point = convert_to_normalized_device_coords(x, y, width, height)
 		clip_coords_point = np.array([ndc_point[0], ndc_point[1], -1.0, 1.0])
 		view_coords_point = convert_to_eye_coords(clip_coords_point, self._camera.get_projection_matrix())
@@ -82,5 +82,5 @@ class MousePicker(object):
 		ray = normalize_vector(ray)
 		return ray
 
-	def update_ray ( self, x, y, width, height ):
+	def update_ray (self, x, y, width, height):
 		self.ray = self.compute_mouse_ray(x, y, width, height)

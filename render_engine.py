@@ -1,5 +1,9 @@
 import OpenGL.GL as GL
-from PyQt5.QtGui import QMatrix4x4, QOpenGLShader, QOpenGLShaderProgram
+from PyQt5.QtGui import (QMatrix4x4,
+                         QOpenGLShader,
+                         QOpenGLShaderProgram)
+
+from PyQt5.QtCore import QPropertyAnimation, QParallelAnimationGroup
 
 from entity import *
 from model import *
@@ -44,6 +48,12 @@ class SceneRenderer(QObject):
 		                                 np.array([0.6, 0.6, 0.6])))
 
 		self._mouse_position = np.array([0.0, 0.0])
+
+		# animation for tile
+		self._tile_hover_animation_group = QParallelAnimationGroup()
+		self._tile_hover_1 = QPropertyAnimation()
+		self._tile_hover_2 = QPropertyAnimation()
+		self._tile_exit_1 = QPropertyAnimation()
 
 	def initialize (self):
 
@@ -96,9 +106,19 @@ class SceneRenderer(QObject):
 			for col in range(8):
 				e = self._board_entities[col + 8 * row]
 				if board_table[row][col] > 0.0:
-					e.color[0] = 0.3
-					e.color[1] = 0.8
-					e.color[2] = 0.2
+					if e.position[1] < 0.0:
+						self._tile_hover_1 = QPropertyAnimation(e, str.encode('_color'))
+						self._tile_hover_1.setDuration(100)
+						self._tile_hover_1.setStartValue(QVector3D(e.color[0], e.color[1], e.color[2]))
+						self._tile_hover_1.setEndValue(QVector3D(0.8, 0.1, 0.1))
+
+						self._tile_hover_2 = QPropertyAnimation(e, str.encode('_position'))
+						self._tile_hover_2.setDuration(100)
+						self._tile_hover_2.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
+						self._tile_hover_2.setEndValue(QVector3D(e.position[0], 2.0, e.position[2]))
+						self._tile_hover_1.start()
+						self._tile_hover_2.start()
+
 				else:
 					if (row + col) % 2 == 0:
 						e.color[0] = 0.0
@@ -108,6 +128,7 @@ class SceneRenderer(QObject):
 						e.color[0] = 1.0
 						e.color[1] = 1.0
 						e.color[2] = 1.0
+					e.position[1] = -0.25
 
 	def prepare_piece_table (self, piece_table):
 		for row in range(8):
