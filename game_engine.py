@@ -29,14 +29,14 @@ class GameEngine(object):
 					self._hover_table[self._curr_row][self._curr_col] = 1.0
 
 	def on_clicked ( self, button, x, y ):
+		val = self._piece_table[self._curr_row][self._curr_col]
 		if button == 0:
 			self._piece_table[self._curr_row][self._curr_col] += 1
 		elif button == 1:
-			if self._piece_table[self._curr_row][self._curr_col] == 0:
+			if val == 0:
 				pass
 			else:
 				self._piece_table[self._curr_row][self._curr_col] -= 1
-				print(self._piece_table[self._curr_row][self._curr_col])
 
 	def on_keyboard ( self, key ):
 		pass
