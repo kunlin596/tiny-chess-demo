@@ -14,7 +14,7 @@ BUNNY_INDEX = 1
 
 
 class SceneRenderer(QObject):
-	def __init__ ( self, window = None, camera = None, parent = None ):
+	def __init__ (self, window = None, camera = None, parent = None):
 		super(SceneRenderer, self).__init__(parent)
 
 		self._window = window
@@ -45,7 +45,7 @@ class SceneRenderer(QObject):
 
 		self._mouse_position = np.array([0.0, 0.0])
 
-	def initialize ( self ):
+	def initialize (self):
 
 		self.set_viewport_size(self._window.size() * self._window.devicePixelRatio())
 		self._mesh_data[CUBE_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'cube')
@@ -80,18 +80,18 @@ class SceneRenderer(QObject):
 		self._entity_creator = EntityCreator(self._models)
 		self._entity_creator.create_checker_board(self._board_entities)
 
-	def sync ( self ):
+	def sync (self):
 		self._camera.update_projection_matrix(self._window.width(), self._window.height())
 		self._shader.bind()
 		self._shader.setUniformValue('projection_matrix',
 		                             QMatrix4x4(self._camera.get_projection_matrix().flatten().tolist()))
 		self._shader.release()
 
-	def invalidate ( self ):
+	def invalidate (self):
 		# TODO
 		pass
 
-	def prepare_board_table ( self, board_table ):
+	def prepare_board_table (self, board_table):
 		for row in range(8):
 			for col in range(8):
 				e = self._board_entities[col + 8 * row]
@@ -109,7 +109,7 @@ class SceneRenderer(QObject):
 						e.color[1] = 1.0
 						e.color[2] = 1.0
 
-	def prepare_piece_table ( self, piece_table ):
+	def prepare_piece_table (self, piece_table):
 		for row in range(8):
 			for col in range(8):
 				if piece_table[row][col] > 0:
@@ -129,13 +129,13 @@ class SceneRenderer(QObject):
 					if (row, col) in self._piece_entities.keys():
 						self._piece_entities.pop((row, col))
 
-	def render ( self ):
+	def render (self):
 
 		# right on Ubuntu 16.04, must * 2 on mac
 		w = self._window.width()
 		h = self._window.height()
 
-		GL.glViewport(0, 0, w, h)  #
+		GL.glViewport(0, 0, w * 2, h * 2)  #
 		GL.glClearColor(0.5, 0.5, 0.5, 1)
 		GL.glEnable(GL.GL_DEPTH_TEST)
 		GL.glEnable(GL.GL_CULL_FACE)
@@ -179,23 +179,23 @@ class SceneRenderer(QObject):
 		# Restore the OpenGL state for QtQuick rendering
 		self._window.update()
 
-	def set_viewport_size ( self, size ):
+	def set_viewport_size (self, size):
 		self._viewport_size = size
 
-	def setup_model ( self, model ):
+	def setup_model (self, model):
 		raw_model = model
 		GL.glBindVertexArray(raw_model.vao)
 		GL.glEnableVertexAttribArray(0)
 		GL.glEnableVertexAttribArray(1)
 		GL.glEnableVertexAttribArray(2)
 
-	def release_model ( self ):
+	def release_model (self):
 		GL.glDisableVertexAttribArray(0)
 		GL.glDisableVertexAttribArray(1)
 		GL.glDisableVertexAttribArray(2)
 		GL.glBindVertexArray(0)
 
-	def setup_entity ( self, entity ):
+	def setup_entity (self, entity):
 		m = create_transformation_matrix(entity.position,
 		                                 entity.rotation,
 		                                 entity.scale)
@@ -203,17 +203,17 @@ class SceneRenderer(QObject):
 		self._shader.setUniformValue('uniform_color', QVector3D(entity.color[0], entity.color[1], entity.color[2]))
 		self._shader.setUniformValue('model_matrix', QMatrix4x4(m.flatten().tolist()))
 
-	def create_shader ( self ):
+	def create_shader (self):
 		self._shader = QOpenGLShaderProgram()
 		self._shader.addShaderFromSourceFile(QOpenGLShader.Vertex, 'shaders/OpenGL_4_1/vertex.glsl')
 		self._shader.addShaderFromSourceFile(QOpenGLShader.Fragment, 'shaders/OpenGL_4_1/fragment.glsl')
 		self._shader.link()
 
-	def update_mouse_position ( self, x, y ):
+	def update_mouse_position (self, x, y):
 		self._mouse_position[0] = x
 		self._mouse_position[1] = y
 
-	def move_camera ( self, key ):
+	def move_camera (self, key):
 
 		vertical_direction = normalize_vector(np.cross(self._camera.up, self._camera.target))
 		head_direction = normalize_vector(np.cross(self._camera.target, vertical_direction))
@@ -232,13 +232,13 @@ class SceneRenderer(QObject):
 			self._camera.eye -= head_direction
 		self._camera.update_view_matrix()
 
-	def rotate_camera ( self, dx, dy ):
+	def rotate_camera (self, dx, dy):
 		rate = 0.001
 		self._camera.target = rotate(-dx * rate, self._camera.up) @ self._camera.target
 		self._camera.target = rotate(dy * rate, np.cross(self._camera.up, self._camera.target)) @ self._camera.target
 		self._camera.update_view_matrix()
 
-	def checker_board_entities ( self ):
+	def checker_board_entities (self):
 		return self._board_entities
 
 
@@ -247,12 +247,12 @@ class GpuManager(object):
 	COLOR_LOCATION = 1
 	NORMAL_LOCATION = 2
 
-	def __init__ ( self ):
+	def __init__ (self):
 		self.vaos = []
 		self.vbos = []
 		self.textures = []
 
-	def load_to_vao ( self, mesh_data ):
+	def load_to_vao (self, mesh_data):
 		"""
 		Upload data to GPU
 		:return: RawModel
@@ -267,7 +267,7 @@ class GpuManager(object):
 
 		return RawModel(vao, indices_vbo, len(mesh_data.indices))
 
-	def set_vertex_attribute_data ( self, attrib_id, component_size, data ):
+	def set_vertex_attribute_data (self, attrib_id, component_size, data):
 		data = data.astype(np.float32)  # data is of float64 by default
 		vbo = GL.glGenBuffers(1)
 		GL.glBindBuffer(GL.GL_ARRAY_BUFFER, vbo)
@@ -283,16 +283,16 @@ class GpuManager(object):
 	# 	GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR)
 	# 	GL.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_LOD_BIAS, -0.4)
 
-	def create_and_bind_vao ( self ):
+	def create_and_bind_vao (self):
 		vao = GL.glGenVertexArrays(1)
 		self.vaos.append(vao)
 		GL.glBindVertexArray(vao)
 		return vao
 
-	def unbind_vao ( self ):
+	def unbind_vao (self):
 		GL.glBindVertexArray(0)
 
-	def create_indices_buffer ( self, indices ):
+	def create_indices_buffer (self, indices):
 		vbo = GL.glGenBuffers(1)
 		GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, vbo)
 		GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER,
@@ -303,7 +303,7 @@ class GpuManager(object):
 		self.vbos.append(vbo)
 		return vbo
 
-	def release_all ( self ):
+	def release_all (self):
 		for b in self.vaos:
 			GL.glDeleteVertexArrays(b)
 		for b in self.vbos:
