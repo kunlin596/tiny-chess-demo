@@ -16,8 +16,15 @@ UNSIGNED_INT_SIZE = 4
 CUBE_MODEL_INDEX = 0
 BUNNY_INDEX = 1
 
+TILE_EMPTY = 0
+TILE_OCCUPIED = 1
+TILE_SELECTED = 2
+TILE_DESTINATION = 3
+
 
 class SceneRenderer(QObject):
+	animation_finished = pyqtSignal()
+
 	def __init__ (self, window = None, camera = None, parent = None):
 		super(SceneRenderer, self).__init__(parent)
 
@@ -54,6 +61,13 @@ class SceneRenderer(QObject):
 		self._tile_hover_1 = QPropertyAnimation()
 		self._tile_hover_2 = QPropertyAnimation()
 		self._tile_exit_1 = QPropertyAnimation()
+
+		self._tile_select_1 = QPropertyAnimation()
+		self._tile_select_2 = QPropertyAnimation()
+		self._tile_select_3 = QPropertyAnimation()
+
+		self._tile_move_1 = QPropertyAnimation()
+		self._tile_move_2 = QPropertyAnimation()
 
 	def initialize (self):
 
@@ -116,8 +130,8 @@ class SceneRenderer(QObject):
 						self._tile_hover_2.setDuration(100)
 						self._tile_hover_2.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
 						self._tile_hover_2.setEndValue(QVector3D(e.position[0], 2.0, e.position[2]))
-						self._tile_hover_1.start()
-						self._tile_hover_2.start()
+						self._tile_hover_1.start(policy = QPropertyAnimation.DeleteWhenStopped)
+						self._tile_hover_2.start(policy = QPropertyAnimation.DeleteWhenStopped)
 
 				else:
 					if (row + col) % 2 == 0:
@@ -133,7 +147,7 @@ class SceneRenderer(QObject):
 	def prepare_piece_table (self, piece_table):
 		for row in range(8):
 			for col in range(8):
-				if piece_table[row][col] > 0:
+				if piece_table[row][col] == TILE_OCCUPIED:
 					position = self._board_entities[col + 8 * row].position.copy()
 					position[1] = self._board_entities[col + 8 * row].position[1] + 6.0
 					rotation = np.array([0.0, 0.0, 0.0])
@@ -146,9 +160,59 @@ class SceneRenderer(QObject):
 					e.scale = scale
 					e.color = np.array([0.2, 0.8, 0.6])
 					self._piece_entities[(row, col)] = e
-				else:
-					if (row, col) in self._piece_entities.keys():
-						self._piece_entities.pop((row, col))
+				elif piece_table[row][col] == TILE_SELECTED:
+					e = self._piece_entities[(row, col)]
+					e.color = np.array([0.8, 0.5, 0.6])
+
+					self._tile_select_1 = QPropertyAnimation(e, str.encode('_position'))
+					self._tile_select_1.setDuration(50)
+					self._tile_select_1.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
+					self._tile_select_1.setEndValue(QVector3D(e.position[0], 20.0, e.position[2]))
+
+					self._tile_select_2 = QPropertyAnimation(e, str.encode('_scale'))
+					self._tile_select_2.setDuration(50)
+					self._tile_select_2.setStartValue(QVector3D(e.scale[0], e.scale[1], e.scale[2]))
+					self._tile_select_2.setEndValue(QVector3D(11.0, 11.0, 11.0))
+
+					self._tile_select_3 = QPropertyAnimation(e, str.encode('_rotation'))
+					self._tile_select_3.setDuration(50)
+					self._tile_select_3.setStartValue(QVector3D(e.rotation[0], e.rotation[1], e.rotation[2]))
+					self._tile_select_3.setEndValue(QVector3D(e.rotation[0], 360.0, e.rotation[2]))
+
+					self._tile_select_1.start(policy = QPropertyAnimation.DeleteWhenStopped)
+					self._tile_select_2.start(policy = QPropertyAnimation.DeleteWhenStopped)
+					self._tile_select_3.start(policy = QPropertyAnimation.DeleteWhenStopped)
+
+				elif piece_table[row][col] == TILE_DESTINATION:
+					start_r = None
+					start_c = None
+
+					for r in range(8):
+						for c in range(8):
+							if piece_table[r][c] == TILE_SELECTED:
+								start_r = r
+								start_c = c
+
+					if start_r is None or start_r is None:
+						return
+
+					old_e = self._piece_entities[(start_r, start_c)]
+					e = ModelEntity()
+					e.model = self._models[CUBE_INDEX]
+					e.position = old_e.position.copy()
+					e.rotation = old_e.rotation.copy()
+					e.scale = old_e.scale.copy()
+					e.color = np.array([0.2, 0.8, 0.6])
+					self._piece_entities.pop((start_r, start_c))
+					self._piece_entities[(row, col)] = e
+					piece_table[start_r][start_c] = TILE_EMPTY
+					piece_table[row][col] = TILE_OCCUPIED
+
+
+				# self._piece_entities[(row, col)] = e
+				# For delete piece entity
+				# if (row, col) in self._piece_entities.keys():
+				# 	self._piece_entities.pop((row, col))
 
 	def render (self):
 
