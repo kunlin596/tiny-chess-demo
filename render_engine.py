@@ -1,8 +1,9 @@
 import OpenGL.GL as GL
-from PyQt5.QtGui import QMatrix4x4, QOpenGLShader, QOpenGLShaderProgram, QVector3D
+from PyQt5.QtGui import QMatrix4x4, QOpenGLShader, QOpenGLShaderProgram
 
 from entity import *
 from model import *
+from model import EntityCreator
 from utils import *
 
 FLOAT_SIZE = 4
@@ -14,7 +15,7 @@ BUNNY_INDEX = 1
 
 
 class SceneRenderer(QObject):
-	def __init__ (self, window = None, parent = None):
+	def __init__ ( self, window = None, parent = None ):
 		super(SceneRenderer, self).__init__(parent)
 
 		self._window = window
@@ -22,10 +23,10 @@ class SceneRenderer(QObject):
 		self._shader = None
 		self._entity_creator = None
 
+		self._camera.update_projection_matrix(640.0, 480.0)
+
 		self._model_matrix = np.identity(4)
-		self._projection_matrix = perspective_projection(45.0, 640.0 / 480.0, 0.001, 500.0)
-		self._mouse_picker = MousePicker(self._camera,
-		                                 self._projection_matrix)
+		self._mouse_picker = MousePicker(self._camera)
 
 		self._cpu_manager = GpuManager()  # load data onto gpu
 		self._mesh_data = dict()  # store all the raw mesh data
@@ -33,7 +34,7 @@ class SceneRenderer(QObject):
 		self._entities = dict()
 		self._light_sources = []  # lighting
 
-		self._checker_board_entities = None
+		self._checker_board_entities = ModelEntityList()
 
 		self._light_sources.append(Light('sun1',
 		                                 np.array([1000.0, 2000.0, 3000.0]),
@@ -44,8 +45,11 @@ class SceneRenderer(QObject):
 
 		self._mouse_position = np.array([0.0, 0.0])
 
-	def initialize (self):
-		self.set_projection_matrix()
+	def checker_board_entities ( self ):
+		return self._checker_board_entities
+
+	def initialize ( self ):
+
 		self.set_viewport_size(self._window.size() * self._window.devicePixelRatio())
 		self._mesh_data[CUBE_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'cube')
 		self._mesh_data[BUNNY_INDEX] = MeshData.ReadFromFile('mesh/bunny.obj', 'bunny')
@@ -72,26 +76,27 @@ class SceneRenderer(QObject):
 
 		self._shader.setUniformValue('shine_damper', 20.0)
 		self._shader.setUniformValue('reflectivity', 1.0)
+		self._shader.setUniformValue('projection_matrix',
+		                             QMatrix4x4(self._camera.get_projection_matrix().flatten().tolist()))
 		self._shader.release()
 
 		self._entity_creator = EntityCreator(self._models)
+		self._entity_creator.create_checker_board(self._checker_board_entities)
 
-		self._checker_board_entities = self._entity_creator.create_checker_board()
+	def sync ( self ):
+		self._camera.update_projection_matrix(self._window.width(), self._window.height())
 
-	def sync (self):
-		self.set_projection_matrix()
-
-	def invalidate (self):
+	def invalidate ( self ):
 		# TODO
 		pass
 
-	def render (self):
+	def render ( self ):
 
 		# right on Ubuntu 16.04, must * 2 on mac
 		w = self._window.width()
 		h = self._window.height()
 
-		GL.glViewport(0, 0, w * 2, h * 2)  #
+		GL.glViewport(0, 0, w, h)  #
 		GL.glClearColor(0.5, 0.5, 0.5, 1)
 		GL.glEnable(GL.GL_DEPTH_TEST)
 		GL.glEnable(GL.GL_CULL_FACE)
@@ -108,8 +113,6 @@ class SceneRenderer(QObject):
 		self._shader.bind()
 		self._shader.setUniformValue('view_matrix',
 		                             QMatrix4x4(view_matrix.flatten().tolist()))
-		self._shader.setUniformValue('projection_matrix',
-		                             QMatrix4x4(self._projection_matrix.flatten().tolist()))
 
 		self.setup_model(self._models[CUBE_INDEX])
 		GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER,
@@ -118,19 +121,21 @@ class SceneRenderer(QObject):
 
 		for row in range(8):
 			for col in range(8):
-				e = self._checker_board_entities[row][col]
+				e = self._checker_board_entities[col + 8 * row]
 				if r == row and c == col:
 					e.color[0] = 0.3
 					e.color[1] = 0.8
 					e.color[2] = 0.2
-				elif (row + col) % 2 == 0:
-					e.color[0] = 0.0
-					e.color[1] = 0.0
-					e.color[2] = 0.0
 				else:
-					e.color[0] = 1.0
-					e.color[1] = 1.0
-					e.color[2] = 1.0
+					if (row + col) % 2 == 0:
+						e.color[0] = 0.0
+						e.color[1] = 0.0
+						e.color[2] = 0.0
+					else:
+						e.color[0] = 1.0
+						e.color[1] = 1.0
+						e.color[2] = 1.0
+
 				self.setup_entity(e)
 				GL.glDrawElements(GL.GL_TRIANGLES,
 				                  self._models[CUBE_INDEX].num_indices,
@@ -166,29 +171,23 @@ class SceneRenderer(QObject):
 		# Restore the OpenGL state for QtQuick rendering
 		self._window.update()
 
-	def set_viewport_size (self, size):
+	def set_viewport_size ( self, size ):
 		self._viewport_size = size
 
-	def set_projection_matrix (self):
-		# Need to be set every time we change the size of the window
-		self._projection_matrix = perspective_projection(45.0,
-		                                                 self._window.width() / self._window.height(),
-		                                                 0.001, 500.0)
-
-	def setup_model (self, model):
+	def setup_model ( self, model ):
 		raw_model = model
 		GL.glBindVertexArray(raw_model.vao)
 		GL.glEnableVertexAttribArray(0)
 		GL.glEnableVertexAttribArray(1)
 		GL.glEnableVertexAttribArray(2)
 
-	def release_model (self):
+	def release_model ( self ):
 		GL.glDisableVertexAttribArray(0)
 		GL.glDisableVertexAttribArray(1)
 		GL.glDisableVertexAttribArray(2)
 		GL.glBindVertexArray(0)
 
-	def setup_entity (self, entity):
+	def setup_entity ( self, entity ):
 		m = create_transformation_matrix(entity.position,
 		                                 entity.rotation,
 		                                 entity.scale)
@@ -196,23 +195,23 @@ class SceneRenderer(QObject):
 		self._shader.setUniformValue('uniform_color', QVector3D(entity.color[0], entity.color[1], entity.color[2]))
 		self._shader.setUniformValue('model_matrix', QMatrix4x4(m.flatten().tolist()))
 
-	def delete_geometry (self, geo_enum):
+	def delete_geometry ( self, geo_enum ):
 		pass
 
-	def create_shader (self):
+	def create_shader ( self ):
 		self._shader = QOpenGLShaderProgram()
 		self._shader.addShaderFromSourceFile(QOpenGLShader.Vertex, 'shaders/OpenGL_4_1/vertex.glsl')
 		self._shader.addShaderFromSourceFile(QOpenGLShader.Fragment, 'shaders/OpenGL_4_1/fragment.glsl')
 		self._shader.link()
 
-	def add_geometry (self, geo_enum):
+	def add_geometry ( self, geo_enum ):
 		pass
 
-	def update_mouse_position (self, x, y):
+	def update_mouse_position ( self, x, y ):
 		self._mouse_position[0] = x
 		self._mouse_position[1] = y
 
-	def move_camera (self, key):
+	def move_camera ( self, key ):
 
 		vertical_direction = normalize_vector(np.cross(self._camera.up, self._camera.target))
 		head_direction = normalize_vector(np.cross(self._camera.target, vertical_direction))
@@ -231,7 +230,7 @@ class SceneRenderer(QObject):
 			self._camera.eye -= head_direction
 		self._camera.update_view_matrix()
 
-	def rotate_camera (self, dx, dy):
+	def rotate_camera ( self, dx, dy ):
 		rate = 0.001
 		self._camera.target = rotate(-dx * rate, self._camera.up) @ self._camera.target
 		self._camera.target = rotate(dy * rate, np.cross(self._camera.up, self._camera.target)) @ self._camera.target
@@ -243,12 +242,12 @@ class GpuManager(object):
 	COLOR_LOCATION = 1
 	NORMAL_LOCATION = 2
 
-	def __init__ (self):
+	def __init__ ( self ):
 		self.vaos = []
 		self.vbos = []
 		self.textures = []
 
-	def load_to_vao (self, mesh_data):
+	def load_to_vao ( self, mesh_data ):
 		"""
 		Upload data to GPU
 		:return: RawModel
@@ -263,7 +262,7 @@ class GpuManager(object):
 
 		return RawModel(vao, indices_vbo, len(mesh_data.indices))
 
-	def set_vertex_attribute_data (self, attrib_id, component_size, data):
+	def set_vertex_attribute_data ( self, attrib_id, component_size, data ):
 		data = data.astype(np.float32)  # data is of float64 by default
 		vbo = GL.glGenBuffers(1)
 		GL.glBindBuffer(GL.GL_ARRAY_BUFFER, vbo)
@@ -279,16 +278,16 @@ class GpuManager(object):
 	# 	GL.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_LINEAR_MIPMAP_LINEAR)
 	# 	GL.glTexParameterf(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_LOD_BIAS, -0.4)
 
-	def create_and_bind_vao (self):
+	def create_and_bind_vao ( self ):
 		vao = GL.glGenVertexArrays(1)
 		self.vaos.append(vao)
 		GL.glBindVertexArray(vao)
 		return vao
 
-	def unbind_vao (self):
+	def unbind_vao ( self ):
 		GL.glBindVertexArray(0)
 
-	def create_indices_buffer (self, indices):
+	def create_indices_buffer ( self, indices ):
 		vbo = GL.glGenBuffers(1)
 		GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, vbo)
 		GL.glBufferData(GL.GL_ELEMENT_ARRAY_BUFFER,
@@ -299,7 +298,7 @@ class GpuManager(object):
 		self.vbos.append(vbo)
 		return vbo
 
-	def release_all (self):
+	def release_all ( self ):
 		for b in self.vaos:
 			GL.glDeleteVertexArrays(b)
 		for b in self.vbos:

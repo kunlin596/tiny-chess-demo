@@ -1,14 +1,15 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.0
+import MyEntity 1.0
+import "componentCreation.js" as EntityCreationHelper
 
 Item {
 
     id: root
     width: 640
     height: 480
-    property variant click_pos: "0,0"
-
+    property variant click_pos: "0, 0"
 
     focus: true
 
@@ -42,24 +43,25 @@ Item {
         hoverEnabled: true
 
         onPressed: {
-            click_pos = Qt.point(mouse.x,mouse.y)
+            click_pos = Qt.point(mouse.x,mouse.y);
         }
 
         onClicked: {
-            _window.set_mouse_position(mouse.x, mouse.y)
+            _window.on_clicked(mouse.x, mouse.y);
+            _window.set_mouse_position(mouse.x, mouse.y);
         }
 
         onPositionChanged: {
             if (pressed) {
                 var delta = Qt.point(mouse.x - click_pos.x, mouse.y - click_pos.y);
                 _window.rotate_camera(delta.x, delta.y);
+                // Disable mouse picking for
+                _window.set_mouse_position(-100.0, -100.0);
+            } else {
+                _window.set_mouse_position(mouse.x, mouse.y);
             }
-            _window.set_mouse_position(mouse.x, mouse.y)
         }
-
     }
-
-
 //    Rectangle {
 //        id: rectangle
 //        width: 200
@@ -281,5 +283,4 @@ Item {
 //
 //
 //    }
-
 }

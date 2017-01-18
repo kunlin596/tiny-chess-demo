@@ -4,6 +4,8 @@ from PyQt5.QtQuick import QQuickView
 from entity import Camera
 from render_engine import SceneRenderer
 
+from model import ModelEntity, ModelEntityList
+
 
 class EditorView(QQuickView):
 	def __init__ ( self, parent = None ):
@@ -19,6 +21,7 @@ class EditorView(QQuickView):
 
 		self.rootContext().setContextProperty("_camera", self._camera)
 		self.rootContext().setContextProperty("_window", self)
+		self.rootContext().setContextProperty("_checker_board_entities", self._renderer._checker_board_entities)
 
 		self.setClearBeforeRendering(False)  # otherwise quick would clear everything we render
 
@@ -61,3 +64,7 @@ class EditorView(QQuickView):
 	@pyqtSlot(int, int)
 	def set_mouse_position ( self, x, y ):
 		self._renderer.update_mouse_position(x, y)
+
+	@pyqtSlot(int, int)
+	def on_clicked ( self, x, y ):
+		pass

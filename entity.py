@@ -1,8 +1,4 @@
-import numpy
-
-from model import Entity
 from utils import *
-from enum import Enum
 
 CUBE_INDEX = 0
 BUNNY_INDEX = 1
@@ -23,26 +19,30 @@ class Camera(QObject):
 
 	def __init__ ( self, parent = None ):
 		super(Camera, self).__init__(parent)
-		self.eye = np.array([0.0, 40.0, -60.0])
+		self.eye = np.array([-60.0, 40.0, -60.0])
 		self.up = np.array([0.0, 1.0, 0.0])
-		self.target = np.array([0.0, -0.2, 0.8])
+		self.target = np.array([0.6, -0.4, 0.6])
 		self.x = None
 		self.y = None
 		self.z = None
 
 		self.mouse_x = 0.0
 		self.mouse_y = 0.0
-		self._m = np.identity(4)
+		self._view_matrix = np.identity(4)
+		self._projection_matrix = np.identity(4)
 		self.update_view_matrix()
 
 	def get_view_matrix ( self ):
-		return self._m
+		return self._view_matrix
 
 	def get_projection_matrix ( self ):
-		pass
+		return self._projection_matrix
 
 	def update_view_matrix ( self ):
-		self._m = look_at(self.eye, self.eye + self.target, self.up)
+		self._view_matrix = look_at(self.eye, self.eye + self.target, self.up)
+
+	def update_projection_matrix ( self, w, h ):
+		self._projection_matrix = perspective_projection(45.0, w / h, 0.001, 500.0)
 
 	@pyqtSlot(float)
 	def translate ( self, dist ):
@@ -62,49 +62,3 @@ class Light(object):
 		self.name = name
 		self.position = position
 		self.color = color
-
-
-class EntityCreator(object):
-	def __init__ ( self, models ):
-		self._models = models
-
-	def create_cube ( self, position, rotation, scale, color ):
-		return Entity(self._models['cube'],
-		              position,
-		              rotation,
-		              scale,
-		              color)
-
-	def create_bunny ( self, position, rotation, scale, color ):
-		return Entity(self._models['bunny'],
-		              position,
-		              rotation,
-		              scale,
-		              color)
-
-	def create_checker_board ( self, length = 10.0, rows = 8, cols = 8 ):
-		entities = []
-		y = -0.25
-		color_black = np.array([0.0, 0.0, 0.0])
-		color_white = np.array([1.0, 1.0, 1.0])
-
-		for row in range(rows):
-			r = []
-			for col in range(cols):
-				position = np.array(
-					[col * length - cols * length / 2.0 + length / 2.0,
-					 y,
-					 row * length - rows * length / 2.0 + length / 2.0])
-				rotation = np.array([0.0, 0.0, 0.0])
-				scale = np.array([9.0, 0.5, 9.0])
-				if (col + row) % 2 == 0:
-					color = color_black.copy()
-				else:
-					color = color_white.copy()
-				r.append(Entity(self._models[CUBE_INDEX],
-				                       position,
-				                       rotation,
-				                       scale,
-				                       color))
-			entities.append(r)
-		return entities
