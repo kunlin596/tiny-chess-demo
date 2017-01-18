@@ -3,7 +3,6 @@ from PyQt5.QtGui import QMatrix4x4, QOpenGLShader, QOpenGLShaderProgram
 
 from entity import *
 from model import *
-from model import EntityCreator
 from utils import *
 
 FLOAT_SIZE = 4
