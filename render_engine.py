@@ -29,12 +29,10 @@ class SceneRenderer(QObject):
 		self._cpu_manager = GpuManager()  # load data onto gpu
 		self._mesh_data = dict()  # store all the raw mesh data
 		self._models = dict()  # for model-entity look up
-		self._entities = dict()
 		self._light_sources = []  # lighting
 
-		self._board_entities = ModelEntityList()
-		# self._piece_entities = ModelEntityList()
-		self._piece_entities = dict()
+		self._title_entities = ModelEntityList()
+		self._piece_entities = [[None for i in range(8)] for j in range(8)]
 
 		self._light_sources.append(Light('sun1',
 		                                 np.array([1000.0, 2000.0, 3000.0]),
@@ -62,10 +60,20 @@ class SceneRenderer(QObject):
 
 		self.set_viewport_size(self._window.size() * self._window.devicePixelRatio())
 		self._mesh_data[CUBE_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'cube')
-		self._mesh_data[BUNNY_INDEX] = MeshData.ReadFromFile('mesh/bunny.obj', 'bunny')
+		self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/king.obj', 'king')
+		self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/queen.obj', 'queen')
+		self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/bishop.obj', 'bishop')
+		self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/knight.obj', 'knight')
+		self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/tower.obj', 'tower')
+		self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/pawn.obj', 'pawn')
 
 		MeshData.CheckData(self._mesh_data[CUBE_MODEL_INDEX])
-		MeshData.CheckData(self._mesh_data[BUNNY_INDEX])
+		MeshData.CheckData(self._mesh_data[CHESS_KING_MODEL_INDEX])
+		MeshData.CheckData(self._mesh_data[CHESS_QUEEN_MODEL_INDEX])
+		MeshData.CheckData(self._mesh_data[CHESS_BISHOP_MODEL_INDEX])
+		MeshData.CheckData(self._mesh_data[CHESS_KNIGHT_MODEL_INDEX])
+		MeshData.CheckData(self._mesh_data[CHESS_TOWER_MODEL_INDEX])
+		MeshData.CheckData(self._mesh_data[CHESS_PAWN_MODEL_INDEX])
 
 		self.create_shader()
 
@@ -73,7 +81,6 @@ class SceneRenderer(QObject):
 		self._shader.bind()
 		for k, v in self._mesh_data.items():
 			self._models[k] = self._cpu_manager.load_to_vao(v)
-			self._entities[k] = []
 
 		# Setup diffuse lighting
 		for i in range(len(self._light_sources)):
@@ -91,7 +98,8 @@ class SceneRenderer(QObject):
 		self._shader.release()
 
 		self._entity_creator = EntityCreator(self._models)
-		self._entity_creator.create_checker_board(self._board_entities)
+		self._entity_creator.create_checker_board(self._title_entities)
+		self._entity_creator.create_chess_pieces(self._piece_entities, self._title_entities)
 
 	def sync (self):
 		self._camera.update_projection_matrix(self._window.width(), self._window.height())
@@ -104,11 +112,11 @@ class SceneRenderer(QObject):
 		# TODO
 		pass
 
-	def prepare_board_table (self, board_table):
+	def prepare_hover_table (self, hover_table):
 		for row in range(8):
 			for col in range(8):
-				e = self._board_entities[col + 8 * row]
-				if board_table[row][col] > 0.0:
+				e = self._title_entities[col + 8 * row]
+				if hover_table[row][col] > 0.0:
 					if e.position[1] < 0.0:
 						self._tile_hover_1 = QPropertyAnimation(e, str.encode('_color'))
 						self._tile_hover_1.setDuration(100)
@@ -133,24 +141,17 @@ class SceneRenderer(QObject):
 						e.color[2] = 1.0
 					e.position[1] = -0.25
 
-	def prepare_piece_table (self, piece_table):
+	def prepare_board_table (self, board_table):
 		for row in range(8):
 			for col in range(8):
-				if piece_table[row][col] == TILE_OCCUPIED:
-					position = self._board_entities[col + 8 * row].position.copy()
-					position[1] = self._board_entities[col + 8 * row].position[1] + 6.0
-					rotation = np.array([0.0, 0.0, 0.0])
-					scale = np.array([9.0, 9.0, 9.0])
+				if board_table[row][col].status == TILE_OCCUPIED:
+					e = self._piece_entities[row][col]
+					e.position = self._title_entities[col + 8 * row].position.copy()
 
-					e = ModelEntity()
-					e.model = self._models[CUBE_MODEL_INDEX]
-					e.position = position
-					e.rotation = rotation
-					e.scale = scale
-					e.color = np.array([0.2, 0.6, 0.8])
-					self._piece_entities[(row, col)] = e
-				elif piece_table[row][col] == TILE_SELECTED:
-					e = self._piece_entities[(row, col)]
+				elif board_table[row][col].status == TILE_SELECTED:
+					e = self._piece_entities[row][col]
+					if e is None:
+						continue
 					e.color = np.array([0.8, 0.5, 0.6])
 
 					self._tile_select_1 = QPropertyAnimation(e, str.encode('_position'))
@@ -172,44 +173,32 @@ class SceneRenderer(QObject):
 					self._tile_select_2.start(policy = QPropertyAnimation.DeleteWhenStopped)
 					self._tile_select_3.start(policy = QPropertyAnimation.DeleteWhenStopped)
 
-				elif piece_table[row][col] == TILE_DESTINATION:
+				elif board_table[row][col].status == TILE_DESTINATION:
 					start_r = None
 					start_c = None
 
 					for r in range(8):
 						for c in range(8):
-							if piece_table[r][c] == TILE_SELECTED:
+							if board_table[r][c].status == TILE_SELECTED:
 								start_r = r
 								start_c = c
 
 					if start_r is None or start_r is None:
 						return
 
-					old_e = self._piece_entities[(start_r, start_c)]
-					e = ModelEntity()
-					e.model = self._models[CUBE_MODEL_INDEX]
-					e.position = old_e.position.copy()
-					e.rotation = old_e.rotation.copy()
-					e.scale = old_e.scale.copy()
-					e.color = np.array([0.2, 0.8, 0.6])
-					self._piece_entities.pop((start_r, start_c))
-					self._piece_entities[(row, col)] = e
-					piece_table[start_r][start_c] = TILE_EMPTY
-					piece_table[row][col] = TILE_OCCUPIED
+					print(r, c)
 
-
-				# self._piece_entities[(row, col)] = e
-				# For delete piece entity
-				# if (row, col) in self._piece_entities.keys():
-				# 	self._piece_entities.pop((row, col))
+					e = self._piece_entities[start_r][start_c]
+					self._piece_entities[start_r][start_c] = None
+					self._piece_entities[row][col] = e
+					e.position = self._title_entities[col + 8 * row].position.copy()
+					board_table[start_r][start_c].status = TILE_EMPTY
+					board_table[row][col].status = TILE_OCCUPIED
 
 	def render (self):
-
-		# right on Ubuntu 16.04, must * 2 on mac
 		w = self._window.width()
 		h = self._window.height()
-
-		GL.glViewport(0, 0, w * 2, h * 2)  #
+		GL.glViewport(0, 0, w * 2, h * 2)
 		GL.glClearColor(0.5, 0.5, 0.5, 1)
 		GL.glEnable(GL.GL_DEPTH_TEST)
 		GL.glEnable(GL.GL_CULL_FACE)
@@ -220,45 +209,54 @@ class SceneRenderer(QObject):
 		view_matrix = self._camera.get_view_matrix()
 
 		self._shader.bind()
-		self._shader.setUniformValue('view_matrix',
-		                             QMatrix4x4(view_matrix.flatten().tolist()))
+		self._shader.setUniformValue('view_matrix', QMatrix4x4(view_matrix.flatten().tolist()))
 
+		self.render_tiles()
+		self.render_pieces()
+
+		self._shader.release()
+		self._window.update()
+
+	def render_tiles (self):
 		self.setup_model(self._models[CUBE_MODEL_INDEX])
+
+		# [1] intel driver doesn't include this, must bind manually
 		GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER,
-		                self._models[
-			                CUBE_MODEL_INDEX].indices_vbo)  # [1] intel driver doesn't include this, must bind manually
+		                self._models[CUBE_MODEL_INDEX].indices_vbo)
 
 		for row in range(8):
 			for col in range(8):
-				e = self._board_entities[col + 8 * row]
+				e = self._title_entities[col + 8 * row]
 				self.setup_entity(e)
 				GL.glDrawElements(GL.GL_TRIANGLES,
 				                  self._models[CUBE_MODEL_INDEX].num_indices,
 				                  GL.GL_UNSIGNED_INT,
 				                  None)  # [1]
-
-		for k, v in self._piece_entities.items():
-			self.setup_entity(v)
-			GL.glDrawElements(GL.GL_TRIANGLES,
-			                  self._models[CUBE_MODEL_INDEX].num_indices,
-			                  GL.GL_UNSIGNED_INT,
-			                  None)  # [1]
-
 		GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)  # [1]
-
 		self.release_model()
 
-		self._shader.release()
-
-		# Restore the OpenGL state for QtQuick rendering
-		self._window.update()
+	def render_pieces (self):
+		for row in range(1):
+			for col in range(1):
+				e = self._piece_entities[row][col]
+				# e = self._title_entities[col + 8 * row]
+				if e is None:
+					continue
+				self.setup_model(e.model)
+				GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, e.model.indices_vbo)
+				self.setup_entity(e)
+				GL.glDrawElements(GL.GL_TRIANGLES,
+				                  e.model.num_indices,
+				                  GL.GL_UNSIGNED_INT,
+				                  None)  # [1]
+				GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)  # [1]
+				self.release_model()
 
 	def set_viewport_size (self, size):
 		self._viewport_size = size
 
 	def setup_model (self, model):
-		raw_model = model
-		GL.glBindVertexArray(raw_model.vao)
+		GL.glBindVertexArray(model.vao)
 		GL.glEnableVertexAttribArray(0)
 		GL.glEnableVertexAttribArray(1)
 		GL.glEnableVertexAttribArray(2)
@@ -313,7 +311,7 @@ class SceneRenderer(QObject):
 		self._camera.update_view_matrix()
 
 	def checker_board_entities (self):
-		return self._board_entities
+		return self._title_entities
 
 
 class GpuManager(object):
@@ -325,6 +323,10 @@ class GpuManager(object):
 		self.vaos = []
 		self.vbos = []
 		self.textures = []
+
+	def __del__ (self):
+		# self.release_all()
+		pass
 
 	def load_to_vao (self, mesh_data):
 		"""

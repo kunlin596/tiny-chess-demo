@@ -2,6 +2,12 @@ from entity import *
 from common import *
 
 
+class TileInfo(object):
+	def __init__ (self, status, entity):
+		self.status = status
+		self.piece = None
+
+
 class GameEngine(object):
 	"""
 	This class is in charge of the whole logic in this program,
@@ -11,18 +17,55 @@ class GameEngine(object):
 	def __init__ (self, window, camera):
 		self._window = window
 		self._camera = camera
-		self._hover_table = np.zeros(shape = (8, 8))
-		self._piece_table = np.zeros(shape = (8, 8), dtype = np.int32)
+		self._hover_table = np.zeros(shape = (8, 8), dtype = np.int32)
+		self._board_table = [[TileInfo(TILE_EMPTY, None) for j in range(8)] for i in range(8)]
+
+		self._board_table[1][0].piece = BLACK_PAWN_8
+		self._board_table[1][1].piece = BLACK_PAWN_7
+		self._board_table[1][2].piece = BLACK_PAWN_6
+		self._board_table[1][3].piece = BLACK_PAWN_5
+		self._board_table[1][4].piece = BLACK_PAWN_4
+		self._board_table[1][5].piece = BLACK_PAWN_3
+		self._board_table[1][6].piece = BLACK_PAWN_2
+		self._board_table[1][7].piece = BLACK_PAWN_1
+
+		self._board_table[0][0].piece = BLACK_TOWER_2
+		self._board_table[0][1].piece = BLACK_KNIGHT_2
+		self._board_table[0][2].piece = BLACK_BISHOP_2
+		self._board_table[0][3].piece = BLACK_KING
+		self._board_table[0][4].piece = BLACK_QUEEN
+		self._board_table[0][5].piece = BLACK_BISHOP_1
+		self._board_table[0][6].piece = BLACK_KNIGHT_1
+		self._board_table[0][7].piece = BLACK_TOWER_1
+
+		self._board_table[6][0].piece = WHITE_PAWN_1
+		self._board_table[6][1].piece = WHITE_PAWN_2
+		self._board_table[6][2].piece = WHITE_PAWN_3
+		self._board_table[6][3].piece = WHITE_PAWN_4
+		self._board_table[6][4].piece = WHITE_PAWN_5
+		self._board_table[6][5].piece = WHITE_PAWN_6
+		self._board_table[6][6].piece = WHITE_PAWN_7
+		self._board_table[6][7].piece = WHITE_PAWN_8
+
+		self._board_table[7][0].piece = WHITE_TOWER_1
+		self._board_table[7][1].piece = WHITE_KNIGHT_1
+		self._board_table[7][2].piece = WHITE_BISHOP_1
+		self._board_table[7][3].piece = WHITE_KING
+		self._board_table[7][4].piece = WHITE_QUEEN
+		self._board_table[7][5].piece = WHITE_BISHOP_2
+		self._board_table[7][6].piece = WHITE_KNIGHT_2
+		self._board_table[7][7].piece = WHITE_TOWER_2
+
 		self._mouse_picker = MousePicker(self._camera)
 
 		self._curr_row = -100
 		self._curr_col = -100
 
 		for i in range(8):
-			self._piece_table[0][i] = TILE_OCCUPIED
-			self._piece_table[1][i] = TILE_OCCUPIED
-			self._piece_table[6][i] = TILE_OCCUPIED
-			self._piece_table[7][i] = TILE_OCCUPIED
+			self._board_table[0][i].status = TILE_OCCUPIED
+			self._board_table[1][i].status = TILE_OCCUPIED
+			self._board_table[6][i].status = TILE_OCCUPIED
+			self._board_table[7][i].status = TILE_OCCUPIED
 
 		self._has_selected = False
 		self._selected_tile = [None, None]
@@ -44,33 +87,30 @@ class GameEngine(object):
 		self._curr_row, self._curr_col = find_coords_on_plane(plane_point, 10.0, 8, 8)
 		if self._curr_row is None or self._curr_col is None:
 			return
-		if button == 0 and self._piece_table[self._curr_row][self._curr_col] == TILE_OCCUPIED:
+		if button == 0 and self._board_table[self._curr_row][self._curr_col].status == TILE_OCCUPIED:
 			if not self._has_selected:
-				self._piece_table[self._curr_row][self._curr_col] = TILE_SELECTED
+				self._board_table[self._curr_row][self._curr_col].status = TILE_SELECTED
 				self._has_selected = True
 			else:
-				self._piece_table[self._selected_tile[0]][self._selected_tile[1]] = TILE_OCCUPIED
-				self._piece_table[self._curr_row][self._curr_col] = TILE_SELECTED
+				self._board_table[self._selected_tile[0]][self._selected_tile[1]].status = TILE_OCCUPIED
+				self._board_table[self._curr_row][self._curr_col].status = TILE_SELECTED
 			self._selected_tile[0] = self._curr_row
 			self._selected_tile[1] = self._curr_col
 
-		elif self._has_selected and self._piece_table[self._curr_row][self._curr_col] == TILE_EMPTY:
-			self._piece_table[self._curr_row][self._curr_col] = TILE_DESTINATION
+		elif self._has_selected and self._board_table[self._curr_row][self._curr_col].status == TILE_EMPTY:
+			self._board_table[self._curr_row][self._curr_col].status = TILE_DESTINATION
 			self._has_selected = False
 
 		elif button == 1:
-			if self._piece_table[self._curr_row][self._curr_col] == TILE_SELECTED:
-				self._piece_table[self._curr_row][self._curr_col] = TILE_OCCUPIED
+			if self._board_table[self._curr_row][self._curr_col].status == TILE_SELECTED:
+				self._board_table[self._curr_row][self._curr_col].status = TILE_OCCUPIED
 				self._has_selected = False
 
 	def on_keyboard (self, key):
 		pass
 
-	def update_renderer (self, renderer):
-		pass
-
-	def board_table (self):
+	def hover_table (self):
 		return self._hover_table
 
-	def piece_table (self):
-		return self._piece_table
+	def board_table (self):
+		return self._board_table

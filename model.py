@@ -192,6 +192,13 @@ class Texture(object):
 		return Texture()
 
 
+class PieceModelEntity(ModelEntity):
+	def __init__ (self, parent = None):
+		super(ModelEntity, self).__init__(parent)
+		self.row = None
+		self.col = None
+
+
 class EntityCreator(object):
 	def __init__ (self, models):
 		self._models = models
@@ -214,7 +221,7 @@ class EntityCreator(object):
 		e.color = color
 		return e
 
-	def create_checker_board (self, entities, length = 10.0, rows = 8, cols = 8):
+	def create_checker_board (self, title_entities, length = 10.0, rows = 8, cols = 8):
 		y = -0.25
 		color_black = np.array([0.0, 0.0, 0.0])
 		color_white = np.array([1.0, 1.0, 1.0])
@@ -237,4 +244,48 @@ class EntityCreator(object):
 				e.rotation = rotation
 				e.scale = scale
 				e.color = color
-				entities.append(e)
+				title_entities.append(e)
+
+	def create_chess_pieces (self, piece_entities, tile_entities):
+		"""
+
+		:param piece_entities: in charge of all the entities
+		:param tile_entities: for position reference
+		:return:
+		"""
+
+		color_black = np.zeros(shape = (3,))
+		color_white = np.ones(shape = (3,))
+
+		# black and white pawns
+		for i in range(8):
+			piece_entities[1][i] = self.create_piece(1, i, CHESS_PAWN_MODEL_INDEX, color_black, tile_entities)
+			piece_entities[6][i] = self.create_piece(6, i, CHESS_PAWN_MODEL_INDEX, color_white, tile_entities)
+
+		piece_entities[0][0] = self.create_piece(0, 0, CHESS_TOWER_MODEL_INDEX, color_black, tile_entities)
+		piece_entities[0][1] = self.create_piece(0, 1, CHESS_KNIGHT_MODEL_INDEX, color_black, tile_entities)
+		piece_entities[0][2] = self.create_piece(0, 2, CHESS_BISHOP_MODEL_INDEX, color_black, tile_entities)
+		piece_entities[0][3] = self.create_piece(0, 3, CHESS_KING_MODEL_INDEX, color_black, tile_entities)
+		piece_entities[0][4] = self.create_piece(0, 4, CHESS_QUEEN_MODEL_INDEX, color_black, tile_entities)
+		piece_entities[0][5] = self.create_piece(0, 5, CHESS_BISHOP_MODEL_INDEX, color_black, tile_entities)
+		piece_entities[0][6] = self.create_piece(0, 6, CHESS_KNIGHT_MODEL_INDEX, color_black, tile_entities)
+		piece_entities[0][7] = self.create_piece(0, 7, CHESS_TOWER_MODEL_INDEX, color_black, tile_entities)
+
+		piece_entities[7][0] = self.create_piece(7, 0, CHESS_TOWER_MODEL_INDEX, color_white, tile_entities)
+		piece_entities[7][1] = self.create_piece(7, 1, CHESS_KNIGHT_MODEL_INDEX, color_white, tile_entities)
+		piece_entities[7][2] = self.create_piece(7, 2, CHESS_BISHOP_MODEL_INDEX, color_white, tile_entities)
+		piece_entities[7][3] = self.create_piece(7, 3, CHESS_KING_MODEL_INDEX, color_white, tile_entities)
+		piece_entities[7][4] = self.create_piece(7, 4, CHESS_QUEEN_MODEL_INDEX, color_white, tile_entities)
+		piece_entities[7][5] = self.create_piece(7, 5, CHESS_BISHOP_MODEL_INDEX, color_white, tile_entities)
+		piece_entities[7][6] = self.create_piece(7, 6, CHESS_KNIGHT_MODEL_INDEX, color_white, tile_entities)
+		piece_entities[7][7] = self.create_piece(7, 7, CHESS_TOWER_MODEL_INDEX, color_white, tile_entities)
+
+	def create_piece (self, row, col, role, color, tile_entities):
+		e = PieceModelEntity()
+		e.model = self._models[role]
+		e.position = tile_entities[col + row * 8].position.copy()
+		e.position[1] = tile_entities[col + 8 * row].position[1] + 10.0
+		e.rotation = np.zeros(shape = (3,))
+		e.scale = np.ones(shape = (3,)) * 15.0
+		e.color = color.copy()
+		return e

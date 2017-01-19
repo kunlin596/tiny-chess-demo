@@ -21,7 +21,7 @@ class EditorView(QQuickView):
 
 		self.rootContext().setContextProperty("_camera", self._camera)
 		self.rootContext().setContextProperty("_window", self)
-		self.rootContext().setContextProperty("_checker_board_entities", self._renderer._board_entities)
+		self.rootContext().setContextProperty("_checker_board_entities", self._renderer._title_entities)
 
 		self.setClearBeforeRendering(False)  # otherwise quick would clear everything we render
 
@@ -30,8 +30,8 @@ class EditorView(QQuickView):
 		self.resetOpenGLState()
 
 	def render_scene (self):
+		self._renderer.prepare_hover_table(self._game.hover_table())
 		self._renderer.prepare_board_table(self._game.board_table())
-		self._renderer.prepare_piece_table(self._game.piece_table())
 		self._renderer.render()
 		self.resetOpenGLState()
 

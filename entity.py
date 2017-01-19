@@ -1,6 +1,5 @@
 from utils import *
 from PyQt5.QtCore import QObject, pyqtSlot
-from common import *
 
 
 class Camera(QObject):
