@@ -158,7 +158,7 @@ class SceneRenderer(QObject):
 					e.position = position
 					e.rotation = rotation
 					e.scale = scale
-					e.color = np.array([0.2, 0.8, 0.6])
+					e.color = np.array([0.2, 0.6, 0.8])
 					self._piece_entities[(row, col)] = e
 				elif piece_table[row][col] == TILE_SELECTED:
 					e = self._piece_entities[(row, col)]
@@ -220,7 +220,7 @@ class SceneRenderer(QObject):
 		w = self._window.width()
 		h = self._window.height()
 
-		GL.glViewport(0, 0, w * 2, h * 2)  #
+		GL.glViewport(0, 0, w, h)  #
 		GL.glClearColor(0.5, 0.5, 0.5, 1)
 		GL.glEnable(GL.GL_DEPTH_TEST)
 		GL.glEnable(GL.GL_CULL_FACE)

@@ -1,5 +1,4 @@
 import QtQuick 2.0
-//import OpenGLUnderQml 1.0
 import QtGraphicalEffects 1.0
 
 Rectangle {
@@ -8,17 +7,24 @@ Rectangle {
 
     property alias text: text.text
     property alias mouse_area: mouse_area
+    property color active_color:  Qt.rgba(0.0, 0.2, 0.8, 0.8)
 
-    color: Qt.rgba(0.2, 0.2, 0.2, 1.0)
-
-    Behavior on width { NumberAnimation { duration: 30 } }
-
+    color: Qt.rgba(0.2, 0.2, 0.2, 0.8)
     Text {
         id: text
         text: 'Button'
         anchors.centerIn: parent
         font.pointSize: 10
         color: 'white'
+    }
+
+    Image {
+        id: menu_image_shadow
+        anchors.top: parent.top
+        anchors.left: parent.right
+        height: parent.height
+        z: 4
+        source: "shadow_long.png"
     }
 
     MouseArea {
@@ -28,15 +34,21 @@ Rectangle {
         hoverEnabled: true
 
         onEntered: {
-            parent.width = 120;
-            parent.color = Qt.rgba(0.0, 0.2, 0.8, 1.0)
+            parent.color = parent.active_color
         }
 
         onExited: {
-            parent.width = 100;
-            parent.color = Qt.rgba(0.2, 0.2, 0.2, 1.0)
+            parent.color = Qt.rgba(0.2, 0.2, 0.2, 0.8)
         }
 
         onClicked: { }
+    }
+
+    Behavior on x {
+       NumberAnimation{ duration: 300 }
+    }
+
+    Behavior on opacity {
+       NumberAnimation{ duration: 300 }
     }
 }

@@ -1,5 +1,4 @@
 import QtQuick 2.0
-import QtQuick.Controls 1.4
 import QtQuick.Layouts 1.0
 import MyEntity 1.0
 import "componentCreation.js" as EntityCreationHelper
@@ -12,6 +11,7 @@ Item {
     property variant click_pos: "0, 0"
 
     focus: true
+
 
     Keys.onPressed: {
         switch(event.key) {
@@ -67,227 +67,166 @@ Item {
                 _window.on_hover(mouse.x, mouse.y);
                 _window.set_mouse_position(mouse.x, mouse.y);
             }
+            mouse.accepted = false;
         }
     }
-//    Rectangle {
-//        id: rectangle
-//        width: 200
-//        color: "#804b2e83"
-//        radius: 0
-//        border.width: 0
-//        anchors.left: parent.left
-//        anchors.leftMargin: 0
-//        anchors.bottom: parent.bottom
-//        anchors.bottomMargin: 0
-//        anchors.top: parent.top
-//        anchors.topMargin: 0
-//        z: -1
-//
-//        ColumnLayout {
-//            id: columnLayout1
-//            spacing: 10
-//            anchors.rightMargin: 8
-//            anchors.bottomMargin: 8
-//            anchors.leftMargin: 8
-//            anchors.topMargin: 8
+
+    Rectangle {
+        id : control_panel
+        width: 100.0
+        height: parent.height
+        anchors {
+            top: parent.top
+            left: parent.left
+        }
+        color: Qt.rgba(0.2, 0.2, 0.2, 0.7)
+        Image {
+            id: menu_image_shadow
+            anchors.top: parent.top
+            anchors.left: parent.right
+            height: parent.height
+            z: 4
+            source: "shadow_long.png"
+        }
+
+//        MouseArea {
 //            anchors.fill: parent
-//
-//            ColumnLayout {
-//                id: columnLayout2
-//                width: 100
-//                height: 100
-//                Layout.minimumWidth: 100
-//
-//                Button {
-//                    id: button
-//                    width: 110
-//                    height: 22
-//                    text: qsTr("Add Cube")
-//                    Layout.fillWidth: true
-//                }
-//
-//                Button {
-//                    id: button3
-//                    width: 110
-//                    height: 22
-//                    text: qsTr("Add Bunny")
-//                    Layout.fillWidth: true
-//                }
+//            hoverEnabled: true
+//            onEntered: {
+//                parent.color = Qt.rgba(0.5, 0.5, 0.5, 0.7)
 //            }
-//
-//            ColumnLayout {
-//                id: columnLayout
-//                width: 100
-//                height: 100
-//
-//                Label {
-//                    id: label3
-//                    text: qsTr("Model List")
-//                }
-//
-//                ListView {
-//                    id: listView
-//                    width: 110
-//                    height: 169
-//                    spacing: 2
-//                    Layout.minimumWidth: 100
-//                    Layout.fillWidth: true
-//                    Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-//                    layoutDirection: Qt.LeftToRight
-//                    boundsBehavior: Flickable.DragOverBounds
-//                    interactive: true
-//                    delegate: Item {
-//                        x: 5
-//                        width: 80
-//                        height: 40
-//                        Row {
-//                            id: row1
-//                            Rectangle {
-//                                width: 40
-//                                height: 40
-//                                color: colorCode
-//                            }
-//
-//                            Text {
-//                                text: name
-//                                font.bold: true
-//                                anchors.verticalCenter: parent.verticalCenter
-//                            }
-//                            spacing: 10
-//                        }
-//                    }
-//                    model: ListModel {
-//                        //                    ListElement {
-//                        //                        name: "Grey"
-//                        //                        colorCode: "grey"
-//                        //                    }
-//                        //
-//                        //                    ListElement {
-//                        //                        name: "Red"
-//                        //                        colorCode: "red"
-//                        //                    }
-//                        //
-//                        //                    ListElement {
-//                        //                        name: "Blue"
-//                        //                        colorCode: "blue"
-//                        //                    }
-//                        //
-//                        //                    ListElement {
-//                        //                        name: "Green"
-//                        //                        colorCode: "green"
-//                        //                    }
-//                    }
-//                }
-//
+//            onExited: {
+//                parent.color = Qt.rgba(0.2, 0.2, 0.2, 0.7)
 //            }
-//
-//            Button {
-//                id: deleteButton
-//                width: 110
-//                height: 22
-//                text: qsTr("Delete")
-//                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-//            }
-//
-//            GroupBox {
-//                id: groupBox
-//                Layout.minimumWidth: 100
-//                visible: true
-//                Layout.fillWidth: true
-//                Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-//                title: qsTr("Change Color")
-//
-//                GridLayout {
-//                    id: gridLayout
-//                    anchors.rightMargin: 5
-//                    anchors.leftMargin: 5
-//                    anchors.bottomMargin: 5
-//                    anchors.topMargin: 5
-//                    anchors.fill: parent
-//                    rows: 3
-//                    columns: 2
-//
-//                    Label {
-//                        id: label
-//                        text: qsTr("R")
-//                        verticalAlignment: Text.AlignVCenter
-//                        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-//                    }
-//
-//                    TextEdit {
-//                        id: textEdit
-//                        width: 80
-//                        height: 20
-//                        text: qsTr("1.0")
-//                        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-//                        font.pixelSize: 12
-//                    }
-//
-//                    Label {
-//                        id: label1
-//                        text: qsTr("G")
-//                        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-//                    }
-//
-//                    TextEdit {
-//                        id: textEdit1
-//                        width: 80
-//                        height: 20
-//                        text: qsTr("1.0")
-//                        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-//                        font.pixelSize: 12
-//                    }
-//
-//                    Label {
-//                        id: label2
-//                        text: qsTr("B")
-//                        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-//                    }
-//
-//
-//                    TextEdit {
-//                        id: textEdit2
-//                        width: 80
-//                        height: 20
-//                        text: qsTr("1.0")
-//                        Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
-//                        font.pixelSize: 12
-//                    }
-//
-//                    Button {
-//                        id: button2
-//                        text: qsTr("Enter")
-//                    }
-//
-//                    Button {
-//                        id: button1
-//                        text: qsTr("Reset")
-//                    }
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//                }
-//            }
-//
-//
 //        }
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//    }
+    }
+
+    Button {
+        id: button1
+        text: 'Edit'
+        Button {
+            id: change_color_button
+            text: 'Color'
+            opacity: 0.0
+            x: -100
+            active_color: Qt.rgba(0.9, 0.2, 0.0, 0.8)
+            anchors {
+                top: parent.top
+            }
+        }
+        Button {
+            id: change_position_button
+            text: 'Translate'
+            opacity: 0.0
+            x: -100
+            active_color: Qt.rgba(0.9, 0.2, 0.0, 0.8)
+            anchors {
+                top: change_color_button.bottom
+            }
+        }
+        Button {
+            id: change_orientation_button
+            text: 'Rotate'
+            opacity: 0.0
+            x: -100
+            active_color: Qt.rgba(0.9, 0.2, 0.0, 0.8)
+            anchors {
+                top: change_position_button.bottom
+            }
+        }
+        Button {
+            id: change_scale_button
+            text: 'Scale'
+            opacity: 0.0
+            x: -100
+            active_color: Qt.rgba(0.9, 0.2, 0.0, 0.8)
+            anchors {
+                top: change_orientation_button.bottom
+            }
+        }
+        Button {
+            id: add_button
+            text: 'Add'
+            opacity: 0.0
+            x: -100
+            active_color: Qt.rgba(0.9, 0.2, 0.0, 0.8)
+            anchors {
+                top: change_scale_button.bottom
+            }
+        }
+        Button {
+            id: delete_button
+            text: 'Delete'
+            opacity: 0.0
+            x: -100
+            active_color: Qt.rgba(0.9, 0.2, 0.0, 0.8)
+            anchors {
+                top: add_button.bottom
+            }
+        }
+        mouse_area {
+            onClicked: {
+                if (change_color_button.opacity == 0.0) {
+                    change_color_button.opacity = 1.0
+                    change_position_button.opacity = 1.0
+                    change_orientation_button.opacity = 1.0
+                    change_scale_button.opacity = 1.0
+                    add_button.opacity = 1.0
+                    delete_button.opacity = 1.0
+
+                    change_color_button.x = 100
+                    change_position_button.x = 100
+                    change_orientation_button.x = 100
+                    change_scale_button.x = 100
+                    add_button.x = 100
+                    delete_button.x = 100
+
+                } else {
+                    change_color_button.opacity = 0.0
+                    change_position_button.opacity = 0.0
+                    change_orientation_button.opacity = 0.0
+                    change_scale_button.opacity = 0.0
+                    add_button.opacity = 0.0
+                    delete_button.opacity = 0.0
+
+                    change_color_button.x = -100
+                    change_position_button.x = -100
+                    change_orientation_button.x = -100
+                    change_scale_button.x = -100
+                    add_button.x = -100
+                    delete_button.x = -100
+                }
+            }
+        }
+    }
+
+    Button {
+        id: button2
+        anchors.top: button1.bottom
+        text: 'Reset'
+    }
+
+    Button {
+        id: list_button
+        anchors.top: button2.bottom
+        text: 'List'
+        mouse_area {
+            onClicked: {
+                if (object_list.opacity == 1.0) {
+                    object_list.x = -100
+                    object_list.opacity = 0.0
+                } else {
+                    object_list.x = 100
+                    object_list.opacity = 1.0
+                }
+            }
+        }
+        ObjectList {
+            id: object_list
+            height: root.height
+            opacity: 0.0
+            x: -100
+        }
+    }
+
 }
