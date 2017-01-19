@@ -1,8 +1,7 @@
 import numpy as np
 import pyassimp as ai
 from PyQt5.Qt import QQmlListProperty
-from PyQt5.QtQuick import QQuickItem
-from PyQt5.QtCore import pyqtProperty, pyqtSignal
+from PyQt5.QtCore import pyqtProperty, pyqtSignal, QObject
 from PyQt5.QtGui import QVector3D
 from PyQt5.QtQml import QQmlListProperty
 from common import *
@@ -60,11 +59,11 @@ class RawModel(object):
 		self.num_indices = num_indices  # For glDrawElements()
 
 
-class ModelEntity(QQuickItem):
+class ModelEntity(QObject):
 	name_changed = pyqtSignal()
 
 	def __init__ (self, parent = None):
-		super(QQuickItem, self).__init__(parent)
+		super(ModelEntity, self).__init__(parent)
 		self._name = 'ModelEntity'
 		self.model = None
 		self.position = None
@@ -130,9 +129,9 @@ class ModelEntity(QQuickItem):
 		self.alpha = alpha
 
 
-class ModelEntityList(QQuickItem):
+class ModelEntityList(QObject):
 	def __init__ (self, parent = None):
-		super(QQuickItem, self).__init__(parent)
+		super(ModelEntityList, self).__init__(parent)
 		self._entities = []
 
 	@pyqtProperty(QQmlListProperty)
@@ -193,8 +192,8 @@ class Texture(object):
 
 
 class PieceModelEntity(ModelEntity):
-	def __init__ (self, parent = None):
-		super(ModelEntity, self).__init__(parent)
+	def __init__ (self):
+		super(PieceModelEntity, self).__init__()
 		self.row = None
 		self.col = None
 
@@ -284,8 +283,8 @@ class EntityCreator(object):
 		e = PieceModelEntity()
 		e.model = self._models[role]
 		e.position = tile_entities[col + row * 8].position.copy()
-		e.position[1] += 3.0
+		e.position[1] += 6.0
 		e.rotation = np.zeros(shape = (3,))
-		e.scale = np.ones(shape = (3,)) * 12.0
+		e.scale = np.ones(shape = (3,)) * 8.0
 		e.color = color.copy()
 		return e

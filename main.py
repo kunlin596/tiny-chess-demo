@@ -16,8 +16,8 @@ if __name__ == '__main__':
 
 	app = QGuiApplication(sys.argv)
 
-	qmlRegisterType(ModelEntity, 'MyEntity', 1, 0, 'Entity')
-	qmlRegisterType(ModelEntityList, 'MyEntity', 1, 0, 'EntityList')
+	# qmlRegisterType(ModelEntity, 'MyEntity', 1, 0, 'Entity')
+	# qmlRegisterType(ModelEntityList, 'MyEntity', 1, 0, 'EntityList')
 
 	view = EditorView()
 	view.setResizeMode(QQuickView.SizeRootObjectToView)  # Set for the object to resize correctly

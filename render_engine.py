@@ -4,16 +4,14 @@ from PyQt5.QtCore import (QPropertyAnimation,
 from PyQt5.QtGui import (QMatrix4x4,
                          QOpenGLShader,
                          QOpenGLShaderProgram)
+import cProfile
 
-from common import *
 from entity import *
 from model import *
 from utils import *
 
 
 class SceneRenderer(QObject):
-	animation_finished = pyqtSignal()
-
 	def __init__ (self, window = None, camera = None, parent = None):
 		super(SceneRenderer, self).__init__(parent)
 
@@ -60,12 +58,18 @@ class SceneRenderer(QObject):
 
 		self.set_viewport_size(self._window.size() * self._window.devicePixelRatio())
 		self._mesh_data[CUBE_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'cube', offset = 0.5)
-		self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/king.obj', 'king')
-		self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/queen.obj', 'queen')
-		self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/bishop.obj', 'bishop')
-		self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/knight.obj', 'knight')
-		self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/tower.obj', 'tower')
-		self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/pawn.obj', 'pawn')
+		# self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/king.obj', 'king')
+		# self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/queen.obj', 'queen')
+		# self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/bishop.obj', 'bishop')
+		# self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/knight.obj', 'knight')
+		# self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/tower.obj', 'tower')
+		# self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/pawn.obj', 'pawn')
+		self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'king', offset = 0.5)
+		self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'queen', offset = 0.5)
+		self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'bishop', offset = 0.5)
+		self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'knight', offset = 0.5)
+		self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'tower', offset = 0.5)
+		self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'pawn', offset = 0.5)
 
 		MeshData.CheckData(self._mesh_data[CUBE_MODEL_INDEX])
 		MeshData.CheckData(self._mesh_data[CHESS_KING_MODEL_INDEX])
@@ -147,8 +151,8 @@ class SceneRenderer(QObject):
 				if board_table[row][col].status == TILE_OCCUPIED:
 					e = self._piece_entities[row][col]
 					e.position = self._title_entities[col + 8 * row].position.copy()
-					e.position[1] += self._title_entities[col + 8 * row].position[1] + 3.0
-
+					e.position[1] += self._title_entities[col + 8 * row].position[1] + 6.0
+					e.scale = np.ones(shape = (3,)) * 8.0
 				elif board_table[row][col].status == TILE_SELECTED:
 					e = self._piece_entities[row][col]
 					if e is None:
@@ -163,7 +167,7 @@ class SceneRenderer(QObject):
 					self._tile_select_2 = QPropertyAnimation(e, str.encode('_scale'))
 					self._tile_select_2.setDuration(50)
 					self._tile_select_2.setStartValue(QVector3D(e.scale[0], e.scale[1], e.scale[2]))
-					self._tile_select_2.setEndValue(QVector3D(15.0, 15.0, 15.0))
+					self._tile_select_2.setEndValue(QVector3D(10.0, 10.0, 10.0))
 
 					self._tile_select_3 = QPropertyAnimation(e, str.encode('_rotation'))
 					self._tile_select_3.setDuration(50)
@@ -188,9 +192,11 @@ class SceneRenderer(QObject):
 						return
 
 					e = self._piece_entities[start_r][start_c]
+
 					self._piece_entities[start_r][start_c] = None
 					self._piece_entities[row][col] = e
-					e.position = self._title_entities[col + 8 * row].position.copy()
+
+					e.position = self._title_entities[col + 8 * row].position.copy() + 6.0
 					board_table[start_r][start_c].status = TILE_EMPTY
 					board_table[row][col].status = TILE_OCCUPIED
 
@@ -211,6 +217,7 @@ class SceneRenderer(QObject):
 		self._shader.setUniformValue('view_matrix', QMatrix4x4(view_matrix.flatten().tolist()))
 
 		self.render_tiles()
+		# cProfile.runctx('self.render_pieces()', globals(), locals())
 		self.render_pieces()
 
 		self._shader.release()
