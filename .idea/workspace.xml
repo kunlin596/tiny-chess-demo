@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="9c6112ad-563d-4ac9-919a-6e036a8f30a3" name="Default" comment="Created a common.py module to hold all the enumerations.">
+    <list default="true" id="9c6112ad-563d-4ac9-919a-6e036a8f30a3" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/common.py" afterPath="$PROJECT_DIR$/common.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/entity.py" afterPath="$PROJECT_DIR$/entity.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/game_engine.py" afterPath="$PROJECT_DIR$/game_engine.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/model.py" afterPath="$PROJECT_DIR$/model.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/render_engine.py" afterPath="$PROJECT_DIR$/render_engine.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scene_view.py" afterPath="$PROJECT_DIR$/scene_view.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/mesh/queen.obj" afterPath="$PROJECT_DIR$/mesh/queen.obj" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -147,8 +142,8 @@
           <file leaf-file-name="game_engine.py" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/game_engine.py">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="295">
-                  <caret line="56" column="28" lean-forward="false" selection-start-line="56" selection-start-column="28" selection-end-line="56" selection-end-column="28" />
+                <state relative-caret-position="127">
+                  <caret line="48" column="0" lean-forward="true" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
                   <folding>
                     <element signature="e#0#20#0" expanded="true" />
                     <element signature="e#178#316#1" expanded="false" />
@@ -652,7 +647,14 @@
       <option name="project" value="LOCAL" />
       <updated>1484823058089</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Can load different kinds of chess pieces onto th board. &#10;The problem is very laggy and updating logic needs to be modified.">
+      <created>1484836774674</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1484836774674</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TodoView">
@@ -723,7 +725,8 @@
     <MESSAGE value="Implemented color changing and raising animation on board tiles" />
     <MESSAGE value="Implemented move and select cubes animation. &#10;Implemented a table representing the current situation of the board.&#10;Now cube can be selected and move anywhere on the board." />
     <MESSAGE value="Created a common.py module to hold all the enumerations." />
-    <option name="LAST_COMMIT_MESSAGE" value="Created a common.py module to hold all the enumerations." />
+    <MESSAGE value="Can load different kinds of chess pieces onto th board. &#10;The problem is very laggy and updating logic needs to be modified." />
+    <option name="LAST_COMMIT_MESSAGE" value="Can load different kinds of chess pieces onto th board. &#10;The problem is very laggy and updating logic needs to be modified." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1391,8 +1394,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/game_engine.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="295">
-          <caret line="56" column="28" lean-forward="false" selection-start-line="56" selection-start-column="28" selection-end-line="56" selection-end-column="28" />
+        <state relative-caret-position="127">
+          <caret line="48" column="0" lean-forward="true" selection-start-line="48" selection-start-column="0" selection-end-line="48" selection-end-column="0" />
           <folding>
             <element signature="e#0#20#0" expanded="true" />
             <element signature="e#178#316#1" expanded="false" />
