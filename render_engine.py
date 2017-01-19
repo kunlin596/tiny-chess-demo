@@ -59,7 +59,7 @@ class SceneRenderer(QObject):
 	def initialize (self):
 
 		self.set_viewport_size(self._window.size() * self._window.devicePixelRatio())
-		self._mesh_data[CUBE_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'cube')
+		self._mesh_data[CUBE_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'cube', offset = 0.5)
 		self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/king.obj', 'king')
 		self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/queen.obj', 'queen')
 		self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/bishop.obj', 'bishop')
@@ -147,6 +147,7 @@ class SceneRenderer(QObject):
 				if board_table[row][col].status == TILE_OCCUPIED:
 					e = self._piece_entities[row][col]
 					e.position = self._title_entities[col + 8 * row].position.copy()
+					e.position[1] += self._title_entities[col + 8 * row].position[1] + 3.0
 
 				elif board_table[row][col].status == TILE_SELECTED:
 					e = self._piece_entities[row][col]
@@ -162,7 +163,7 @@ class SceneRenderer(QObject):
 					self._tile_select_2 = QPropertyAnimation(e, str.encode('_scale'))
 					self._tile_select_2.setDuration(50)
 					self._tile_select_2.setStartValue(QVector3D(e.scale[0], e.scale[1], e.scale[2]))
-					self._tile_select_2.setEndValue(QVector3D(11.0, 11.0, 11.0))
+					self._tile_select_2.setEndValue(QVector3D(15.0, 15.0, 15.0))
 
 					self._tile_select_3 = QPropertyAnimation(e, str.encode('_rotation'))
 					self._tile_select_3.setDuration(50)
@@ -185,8 +186,6 @@ class SceneRenderer(QObject):
 
 					if start_r is None or start_r is None:
 						return
-
-					print(r, c)
 
 					e = self._piece_entities[start_r][start_c]
 					self._piece_entities[start_r][start_c] = None
@@ -236,8 +235,8 @@ class SceneRenderer(QObject):
 		self.release_model()
 
 	def render_pieces (self):
-		for row in range(1):
-			for col in range(1):
+		for row in range(8):
+			for col in range(8):
 				e = self._piece_entities[row][col]
 				# e = self._title_entities[col + 8 * row]
 				if e is None:

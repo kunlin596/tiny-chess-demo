@@ -42,10 +42,10 @@ class MeshData(object):
 			print(' texturecoords is empty')
 
 	@classmethod
-	def ReadFromFile (cls, file_name, name = 'None'):
+	def ReadFromFile (cls, file_name, name = 'None', offset = 0.0):
 		scene = ai.load(file_name)
 		mesh = scene.meshes[0]
-		vertices = mesh.vertices - 0.5
+		vertices = mesh.vertices - offset
 		indices = mesh.faces.flatten()  # make 1d for passing
 		colors = mesh.colors
 		normals = mesh.normals
@@ -284,8 +284,8 @@ class EntityCreator(object):
 		e = PieceModelEntity()
 		e.model = self._models[role]
 		e.position = tile_entities[col + row * 8].position.copy()
-		e.position[1] = tile_entities[col + 8 * row].position[1] + 10.0
+		e.position[1] += 3.0
 		e.rotation = np.zeros(shape = (3,))
-		e.scale = np.ones(shape = (3,)) * 15.0
+		e.scale = np.ones(shape = (3,)) * 12.0
 		e.color = color.copy()
 		return e
