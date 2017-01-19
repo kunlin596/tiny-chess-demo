@@ -1,19 +1,5 @@
-import numpy as np
 from entity import *
-import threading
-
-"""
-For the piece table
-0: empty
-1: occupied
-2: selected
-3: destination
-"""
-
-TILE_EMPTY = 0
-TILE_OCCUPIED = 1
-TILE_SELECTED = 2
-TILE_DESTINATION = 3
+from common import *
 
 
 class GameEngine(object):
@@ -28,7 +14,6 @@ class GameEngine(object):
 		self._hover_table = np.zeros(shape = (8, 8))
 		self._piece_table = np.zeros(shape = (8, 8), dtype = np.int32)
 		self._mouse_picker = MousePicker(self._camera)
-		self._lock = threading.Lock()
 
 		self._curr_row = -100
 		self._curr_col = -100

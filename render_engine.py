@@ -1,25 +1,14 @@
 import OpenGL.GL as GL
+from PyQt5.QtCore import (QPropertyAnimation,
+                          QParallelAnimationGroup)
 from PyQt5.QtGui import (QMatrix4x4,
                          QOpenGLShader,
                          QOpenGLShaderProgram)
 
-from PyQt5.QtCore import QPropertyAnimation, QParallelAnimationGroup
-
+from common import *
 from entity import *
 from model import *
 from utils import *
-
-FLOAT_SIZE = 4
-DOUBLE_SIZE = 8
-UNSIGNED_INT_SIZE = 4
-
-CUBE_MODEL_INDEX = 0
-BUNNY_INDEX = 1
-
-TILE_EMPTY = 0
-TILE_OCCUPIED = 1
-TILE_SELECTED = 2
-TILE_DESTINATION = 3
 
 
 class SceneRenderer(QObject):
@@ -154,7 +143,7 @@ class SceneRenderer(QObject):
 					scale = np.array([9.0, 9.0, 9.0])
 
 					e = ModelEntity()
-					e.model = self._models[CUBE_INDEX]
+					e.model = self._models[CUBE_MODEL_INDEX]
 					e.position = position
 					e.rotation = rotation
 					e.scale = scale
@@ -198,7 +187,7 @@ class SceneRenderer(QObject):
 
 					old_e = self._piece_entities[(start_r, start_c)]
 					e = ModelEntity()
-					e.model = self._models[CUBE_INDEX]
+					e.model = self._models[CUBE_MODEL_INDEX]
 					e.position = old_e.position.copy()
 					e.rotation = old_e.rotation.copy()
 					e.scale = old_e.scale.copy()
@@ -220,7 +209,7 @@ class SceneRenderer(QObject):
 		w = self._window.width()
 		h = self._window.height()
 
-		GL.glViewport(0, 0, w, h)  #
+		GL.glViewport(0, 0, w * 2, h * 2)  #
 		GL.glClearColor(0.5, 0.5, 0.5, 1)
 		GL.glEnable(GL.GL_DEPTH_TEST)
 		GL.glEnable(GL.GL_CULL_FACE)

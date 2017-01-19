@@ -1,4 +1,3 @@
-import numpy
 import numpy as np
 import pyassimp as ai
 from PyQt5.Qt import QQmlListProperty
@@ -6,8 +5,7 @@ from PyQt5.QtQuick import QQuickItem
 from PyQt5.QtCore import pyqtProperty, pyqtSignal
 from PyQt5.QtGui import QVector3D
 from PyQt5.QtQml import QQmlListProperty
-
-from entity import CUBE_INDEX
+from common import *
 
 
 class MeshData(object):
@@ -234,7 +232,7 @@ class EntityCreator(object):
 					color = color_white.copy()
 
 				e = ModelEntity()
-				e.model = self._models[CUBE_INDEX]
+				e.model = self._models[CUBE_MODEL_INDEX]
 				e.position = position
 				e.rotation = rotation
 				e.scale = scale

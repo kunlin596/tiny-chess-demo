@@ -1,15 +1,13 @@
-from PyQt5.QtCore import Qt, pyqtSlot
+from PyQt5.QtCore import Qt
 from PyQt5.QtQuick import QQuickView
 
 from entity import *
 from render_engine import SceneRenderer
 from game_engine import GameEngine
 
-from model import ModelEntity, ModelEntityList
-
 
 class EditorView(QQuickView):
-	def __init__ ( self, parent = None ):
+	def __init__ (self, parent = None):
 		super(EditorView, self).__init__(parent)
 		self._renderer = None
 		self._camera = Camera()
@@ -27,52 +25,52 @@ class EditorView(QQuickView):
 
 		self.setClearBeforeRendering(False)  # otherwise quick would clear everything we render
 
-	def initialize_scene ( self ):
+	def initialize_scene (self):
 		self._renderer.initialize()
 		self.resetOpenGLState()
 
-	def render_scene ( self ):
+	def render_scene (self):
 		self._renderer.prepare_board_table(self._game.board_table())
 		self._renderer.prepare_piece_table(self._game.piece_table())
 		self._renderer.render()
 		self.resetOpenGLState()
 
-	def invalidate_scene ( self ):
+	def invalidate_scene (self):
 		self._renderer.invalidate()
 		self.resetOpenGLState()
 
-	def synchronize_scene ( self ):
+	def synchronize_scene (self):
 		self._renderer.sync()
 		self.resetOpenGLState()
 
 	@pyqtSlot(int)
-	def add_geometry ( self, geo_enum ):
+	def add_geometry (self, geo_enum):
 		self._renderer.add_geometry(geo_enum)
 
 	@pyqtSlot(int)
-	def delete_geometry ( self, index ):
+	def delete_geometry (self, index):
 		self._renderer.delete_geometry(index)
 
 	@pyqtSlot(int)
-	def select_obj ( self, index = 0 ):
+	def select_obj (self, index = 0):
 		pass
 
 	@pyqtSlot(int, int)
-	def rotate_camera ( self, dx, dy ):
+	def rotate_camera (self, dx, dy):
 		self._renderer.rotate_camera(dx, dy)
 
 	@pyqtSlot(int)
-	def move_camera ( self, key ):
+	def move_camera (self, key):
 		self._renderer.move_camera(key)
 
 	@pyqtSlot(int, int)
-	def set_mouse_position ( self, x, y ):
+	def set_mouse_position (self, x, y):
 		self._renderer.update_mouse_position(x, y)
 
 	@pyqtSlot(int, int)
-	def on_hover ( self, x, y ):
+	def on_hover (self, x, y):
 		self._game.on_mouse_move(x, y)
 
 	@pyqtSlot(int, int, int)
-	def on_clicked ( self, button, x, y ):
+	def on_clicked (self, button, x, y):
 		self._game.on_clicked(button, x, y)

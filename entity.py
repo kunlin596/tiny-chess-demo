@@ -1,9 +1,6 @@
-import numpy as np
 from utils import *
 from PyQt5.QtCore import QObject, pyqtSlot
-
-CUBE_INDEX = 0
-BUNNY_INDEX = 1
+from common import *
 
 
 class Camera(QObject):
