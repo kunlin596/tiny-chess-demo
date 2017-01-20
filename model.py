@@ -233,7 +233,7 @@ class EntityCreator(object):
 				                     y,
 				                     row * length - rows * length / 2.0 + length / 2.0])
 				rotation = np.array([0.0, 0.0, 0.0])
-				scale = np.array([9.5, 0.5, 9.5])
+				scale = TILE_STATIC_SCALE
 				if (col + row) % 2 == 0:
 					color = color_black.copy()
 				else:
@@ -256,10 +256,10 @@ class EntityCreator(object):
 		:return:
 		"""
 
-		color_black = np.zeros(shape = (3,)) + 0.2
-		color_white = np.ones(shape = (3,)) - 0.2
-		select_color1 = np.array([1.0, 0.2, 0.1])
-		select_color2 = np.array([0.1, 0.2, 1.0])
+		color_black = PIECE_COLOR_PLAYER_BLACK
+		color_white = PIECE_COLOR_PLAYER_WHITE
+		select_color1 = PIECE_SELECTION_COLOR_PLAYER_BLACK
+		select_color2 = PIECE_SELECTION_COLOR_PLAYER_WHITE
 
 		# black and white pawns
 		for i in range(8):
@@ -306,9 +306,9 @@ class EntityCreator(object):
 		e = PieceModelEntity()
 		e.model = self._models[role]
 		e.position = tile_entities[col + row * 8].position.copy()
-		e.position[1] += 1.5
+		e.position[1] += PIECE_STATIC_Y_OFFSET
 		e.rotation = np.zeros(shape = (3,))
-		e.scale = np.ones(shape = (3,)) * 12.0
+		e.scale = PIECE_STATIC_SCALE.copy()
 		e.color = color.copy()
 		e.select_color = select_color.copy()
 		e.original_color = color.copy()

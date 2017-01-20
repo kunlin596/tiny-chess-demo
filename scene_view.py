@@ -30,8 +30,8 @@ class EditorView(QQuickView):
 		self.resetOpenGLState()
 
 	def render_scene (self):
-		self._renderer.prepare_hover_table(self._game.hover_table())
-		self._renderer.prepare_board_table(self._game.board_table())
+		self._renderer.prepare_titles(self._game.hover_table())
+		self._renderer.prepare_pieces(self._game.board_table())
 		self._renderer.render()
 		self.resetOpenGLState()
 

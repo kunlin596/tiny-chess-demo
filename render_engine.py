@@ -45,24 +45,32 @@ class SceneRenderer(QObject):
 		self._tile_hover_animation_group = QParallelAnimationGroup()
 		self._tile_hover_1 = QPropertyAnimation()
 		self._tile_hover_2 = QPropertyAnimation()
-		self._tile_exit_1 = QPropertyAnimation()
 
 		self._tile_select_1 = QPropertyAnimation()
 		self._tile_select_2 = QPropertyAnimation()
 		self._tile_select_3 = QPropertyAnimation()
+		self._piece_selected_1 = QPropertyAnimation()
+		self._piece_selected_2 = QPropertyAnimation()
 
 		self._tile_move_1 = QPropertyAnimation()
 		self._tile_move_2 = QPropertyAnimation()
 
-		self._piece_move_1 = QPropertyAnimation()  # color
-		self._piece_move_2 = QPropertyAnimation()  # position
-		self._piece_move_3 = QPropertyAnimation()  # scale
+		self._piece_move_animation_group = QParallelAnimationGroup()
+		self._piece_move_animation = []
 
-		self._animation_finished = True
+		self._piece_reset_animation_group = QParallelAnimationGroup()
+		self._piece_reset_animation = []
+
+		self._move_animation_finished = True
+		self._reset_animation_finished = True
 
 	@pyqtSlot()
-	def animation_finished (self):
-		self._animation_finished = True
+	def move_animation_finished (self):
+		self._move_animation_finished = True
+
+	@pyqtSlot()
+	def reset_animation_finished (self):
+		self._reset_animation_finished = True
 
 	def initialize (self):
 
@@ -89,7 +97,7 @@ class SceneRenderer(QObject):
 		MeshData.CheckData(self._mesh_data[CHESS_TOWER_MODEL_INDEX])
 		MeshData.CheckData(self._mesh_data[CHESS_PAWN_MODEL_INDEX])
 
-		self.create_shader()
+		self._create_shader()
 
 		# Setup mesh data
 		self._shader.bind()
@@ -126,7 +134,7 @@ class SceneRenderer(QObject):
 		# TODO
 		pass
 
-	def prepare_hover_table (self, hover_table):
+	def prepare_titles (self, hover_table):
 		for row in range(8):
 			for col in range(8):
 				e = self._title_entities[col + 8 * row]
@@ -137,17 +145,18 @@ class SceneRenderer(QObject):
 					e.color = e.original_color.copy()
 					e.position[1] = -0.25
 
-	def prepare_board_table (self, board_table):
+	def prepare_pieces (self, board_table):
 		for row in range(8):
 			for col in range(8):
 				if board_table[row][col].status == TILE_EMPTY:
 					continue
-				elif board_table[row][col].status == TILE_OCCUPIED and self._animation_finished:
+				elif board_table[row][col].status == TILE_OCCUPIED and self._move_animation_finished:
 					self.reset_piece(self._piece_entities[row][col], row, col)
 				elif board_table[row][col].status == TILE_SELECTED:
 					e = self._piece_entities[row][col]
 					if e is not None:
 						self.animate_select_piece(e)
+					# self.animate_selected_piece(e)
 
 				elif board_table[row][col].status == TILE_DESTINATION:
 					start_r, start_c = board_table.selected
@@ -165,56 +174,140 @@ class SceneRenderer(QObject):
 					self.animate_piece_move(e,
 					                        self._title_entities[start_c + 8 * start_r].position,
 					                        self._title_entities[col + 8 * row].position)
-					self._animation_finished = False
+					self._move_animation_finished = False
 
 	def reset_piece (self, e, row, col):
+		# self.animate_reset_piece(e, row, col)
 		e.position = self._title_entities[col + 8 * row].position.copy()
-		e.position[1] += self._title_entities[col + 8 * row].position[1] + 3.0
-		e.scale = np.ones(shape = (3,)) * 12.0
-		e.color = e.original_color.copy()
+		e.position[1] += self._title_entities[col + 8 * row].position[1] + PIECE_STATIC_Y_OFFSET
+		e.scale = PIECE_STATIC_SCALE.copy()
+		e.color = e.original_color
+		e.rotation = np.zeros((3,))
 
 	def animate_hover_tile (self, e):
+		self._tile_hover_animation_group = QParallelAnimationGroup()
 		self._tile_hover_1 = QPropertyAnimation(e, str.encode('_color'))
 		self._tile_hover_1.setDuration(100)
 		self._tile_hover_1.setStartValue(QVector3D(e.color[0], e.color[1], e.color[2]))
-		self._tile_hover_1.setEndValue(QVector3D(0.8, 0.1, 0.1))
+		self._tile_hover_1.setEndValue(QVector3D(TILE_HOVER_COLOR[0], TILE_HOVER_COLOR[1], TILE_HOVER_COLOR[2]))
 
 		self._tile_hover_2 = QPropertyAnimation(e, str.encode('_position'))
 		self._tile_hover_2.setDuration(100)
 		self._tile_hover_2.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
-		self._tile_hover_2.setEndValue(QVector3D(e.position[0], 1.0, e.position[2]))
-		self._tile_hover_1.start(policy = QPropertyAnimation.DeleteWhenStopped)
-		self._tile_hover_2.start(policy = QPropertyAnimation.DeleteWhenStopped)
+		self._tile_hover_2.setEndValue(QVector3D(e.position[0], TILE_HOVER_Y_POSITION, e.position[2]))
+
+		self._tile_hover_animation_group.addAnimation(self._tile_hover_1)
+		self._tile_hover_animation_group.addAnimation(self._tile_hover_2)
+
+		self._tile_hover_animation_group.start(policy = QParallelAnimationGroup.DeleteWhenStopped)
 
 	def animate_select_piece (self, e):
 		e.color = e.select_color.copy()
 		self._tile_select_1 = QPropertyAnimation(e, str.encode('_position'))
 		self._tile_select_1.setDuration(50)
 		self._tile_select_1.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
-		self._tile_select_1.setEndValue(QVector3D(e.position[0], 10.0, e.position[2]))
+		self._tile_select_1.setEndValue(QVector3D(e.position[0], PIECE_SELECTION_Y_VALUE, e.position[2]))
 
 		self._tile_select_2 = QPropertyAnimation(e, str.encode('_scale'))
 		self._tile_select_2.setDuration(50)
 		self._tile_select_2.setStartValue(QVector3D(e.scale[0], e.scale[1], e.scale[2]))
-		self._tile_select_2.setEndValue(QVector3D(15.0, 15.0, 15.0))
+		self._tile_select_2.setEndValue(
+			QVector3D(PIECE_SELECTION_SCALE[0], PIECE_SELECTION_SCALE[1], PIECE_SELECTION_SCALE[2]))
+
+		if e.player == PLAYER_BLACK:
+			angle = 45.0
+		elif e.player == PLAYER_WHITE:
+			angle = -45.0
 
 		self._tile_select_3 = QPropertyAnimation(e, str.encode('_rotation'))
-		self._tile_select_3.setDuration(50)
+		self._tile_select_3.setDuration(100)
 		self._tile_select_3.setStartValue(QVector3D(e.rotation[0], e.rotation[1], e.rotation[2]))
-		self._tile_select_3.setEndValue(QVector3D(e.rotation[0], 360.0, e.rotation[2]))
+		self._tile_select_3.setEndValue(QVector3D(angle, e.rotation[1], e.rotation[2]))
 
 		self._tile_select_1.start(policy = QPropertyAnimation.DeleteWhenStopped)
 		self._tile_select_2.start(policy = QPropertyAnimation.DeleteWhenStopped)
 		self._tile_select_3.start(policy = QPropertyAnimation.DeleteWhenStopped)
 
+	def animate_selected_piece (self, e):
+		self._piece_selected_1 = QPropertyAnimation(e, str.encode('_rotation'))
+		self._piece_selected_1.setDuration(200)
+		self._piece_selected_1.setStartValue(QVector3D(e.rotation[0], 0.0, e.rotation[2]))
+		self._piece_selected_1.setEndValue(QVector3D(e.rotation[0], 360.0, e.rotation[2]))
+		self._piece_selected_1.start()
+
 	def animate_piece_move (self, e, start, end):
-		self._piece_move_1 = QPropertyAnimation(e, str.encode('_position'))
-		self._piece_move_1.finished.connect(self.animation_finished)
-		self._piece_move_1.setDuration(200)
-		self._piece_move_1.setStartValue(QVector3D(start[0], start[1] + 6.0, start[2]))
-		self._piece_move_1.setEndValue(QVector3D(end[0], end[1], end[2]))
-		self._piece_move_1.start()
-		self._animation_finished = False
+		self._move_animation_finished = False
+		self._piece_move_animation_group = QParallelAnimationGroup()
+		self._piece_move_animation_group.finished.connect(self.move_animation_finished)
+
+		a1 = QPropertyAnimation(e, str.encode('_position'))
+		a1.setDuration(100)
+		a1.setStartValue(QVector3D(start[0], PIECE_SELECTION_Y_VALUE, start[2]))
+		a1.setEndValue(QVector3D(end[0], end[1] + PIECE_STATIC_Y_OFFSET, end[2]))
+
+		a2 = QPropertyAnimation(e, str.encode('_color'))
+		a2.setDuration(100)
+		a2.setStartValue(QVector3D(e.color[0], e.color[1], e.color[2]))
+		a2.setEndValue(QVector3D(e.original_color[0], e.original_color[1], e.original_color[2]))
+
+		a3 = QPropertyAnimation(e, str.encode('_scale'))
+		a3.setDuration(100)
+		a3.setStartValue(QVector3D(e.scale[0], e.scale[1], e.scale[2]))
+		a3.setEndValue(QVector3D(PIECE_STATIC_SCALE[0], PIECE_STATIC_SCALE[1], PIECE_STATIC_SCALE[2]))
+
+		a4 = QPropertyAnimation(e, str.encode('_rotation'))
+		a4.setDuration(100)
+		a4.setStartValue(QVector3D(e.rotation[0], e.rotation[1], e.rotation[2]))
+		a4.setEndValue(QVector3D(0.0, 0.0, 0.0))
+
+		self._piece_move_animation.append(a1)
+		self._piece_move_animation.append(a2)
+		self._piece_move_animation.append(a3)
+		self._piece_move_animation.append(a4)
+		self._piece_move_animation_group.addAnimation(a1)
+		self._piece_move_animation_group.addAnimation(a2)
+		self._piece_move_animation_group.addAnimation(a3)
+		self._piece_move_animation_group.addAnimation(a4)
+
+		self._piece_move_animation_group.start(policy = QParallelAnimationGroup.DeleteWhenStopped)
+
+	def animate_reset_piece (self, e, row, col):
+		self._reset_animation_finished = False
+		self._piece_reset_animation_group = QParallelAnimationGroup()
+
+		a1 = QPropertyAnimation(e, str.encode('_rotation'))
+		a1.setDuration(300)
+		a1.setStartValue(QVector3D(e.rotation[0], e.rotation[1], e.rotation[2]))
+		a1.setEndValue(QVector3D(34.0, 0.0, 0.0))
+		self._piece_reset_animation.append(a1)
+
+		new_pos = self._title_entities[col + 8 * row].position.copy()
+		new_pos[1] = self._title_entities[col + 8 * row].position[1] + PIECE_STATIC_Y_OFFSET
+
+		a2 = QPropertyAnimation(e, str.encode('_position'))
+		a2.setDuration(3000)
+		a2.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
+		a2.setEndValue(QVector3D(new_pos[0], new_pos[1], new_pos[2]))
+		self._piece_reset_animation.append(a2)
+
+		a3 = QPropertyAnimation(e, str.encode('_scale'))
+		a3.setDuration(300)
+		a3.setStartValue(QVector3D(e.scale[0], e.scale[1], e.scale[2]))
+		a3.setEndValue(QVector3D(PIECE_STATIC_SCALE[0], PIECE_STATIC_SCALE[1], PIECE_STATIC_SCALE[2]))
+		self._piece_reset_animation.append(a3)
+
+		a4 = QPropertyAnimation(e, str.encode('_color'))
+		a4.setDuration(300)
+		a4.setStartValue(QVector3D(e.color[0], e.color[1], e.color[2]))
+		a4.setEndValue(QVector3D(e.original_color[0], e.original_color[1], e.original_color[2]))
+		self._piece_reset_animation.append(a4)
+
+		self._piece_reset_animation_group.addAnimation(a1)
+		self._piece_reset_animation_group.addAnimation(a2)
+		self._piece_reset_animation_group.addAnimation(a3)
+		self._piece_reset_animation_group.addAnimation(a4)
+
+		self._piece_reset_animation_group.start(policy = QParallelAnimationGroup.DeleteWhenStopped)
 
 	def render (self):
 		w = self._window.width()
@@ -224,6 +317,8 @@ class SceneRenderer(QObject):
 		GL.glEnable(GL.GL_DEPTH_TEST)
 		GL.glEnable(GL.GL_CULL_FACE)
 		GL.glCullFace(GL.GL_BACK)
+		GL.glEnable(GL.GL_LINE_SMOOTH)
+
 		GL.glClear(GL.GL_COLOR_BUFFER_BIT)
 		GL.glClear(GL.GL_DEPTH_BUFFER_BIT)
 
@@ -232,15 +327,15 @@ class SceneRenderer(QObject):
 		self._shader.bind()
 		self._shader.setUniformValue('view_matrix', QMatrix4x4(view_matrix.flatten().tolist()))
 
-		self.render_tiles()
+		self._render_tiles()
 		# cProfile.runctx('self.render_pieces()', globals(), locals())
-		self.render_pieces()
+		self._render_pieces()
 
 		self._shader.release()
 		self._window.update()
 
-	def render_tiles (self):
-		self.setup_model(self._models[CUBE_MODEL_INDEX])
+	def _render_tiles (self):
+		self._setup_model(self._models[CUBE_MODEL_INDEX])
 
 		# [1] intel driver doesn't include this, must bind manually
 		GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER,
@@ -249,46 +344,46 @@ class SceneRenderer(QObject):
 		for row in range(8):
 			for col in range(8):
 				e = self._title_entities[col + 8 * row]
-				self.setup_entity(e)
+				self._setup_entity(e)
 				GL.glDrawElements(GL.GL_TRIANGLES,
 				                  self._models[CUBE_MODEL_INDEX].num_indices,
 				                  GL.GL_UNSIGNED_INT,
 				                  None)  # [1]
 		GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)  # [1]
-		self.release_model()
+		self._release_model()
 
-	def render_pieces (self):
+	def _render_pieces (self):
 		for row in range(8):
 			for col in range(8):
 				e = self._piece_entities[row][col]
 				if e is None:
 					continue
-				self.setup_model(e.model)
+				self._setup_model(e.model)
 				GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, e.model.indices_vbo)
-				self.setup_entity(e)
+				self._setup_entity(e)
 				GL.glDrawElements(GL.GL_TRIANGLES,
 				                  e.model.num_indices,
 				                  GL.GL_UNSIGNED_INT,
 				                  None)  # [1]
 				GL.glBindBuffer(GL.GL_ELEMENT_ARRAY_BUFFER, 0)  # [1]
-				self.release_model()
+				self._release_model()
 
 	def set_viewport_size (self, size):
 		self._viewport_size = size
 
-	def setup_model (self, model):
+	def _setup_model (self, model):
 		GL.glBindVertexArray(model.vao)
 		GL.glEnableVertexAttribArray(0)
 		GL.glEnableVertexAttribArray(1)
 		GL.glEnableVertexAttribArray(2)
 
-	def release_model (self):
+	def _release_model (self):
 		GL.glDisableVertexAttribArray(0)
 		GL.glDisableVertexAttribArray(1)
 		GL.glDisableVertexAttribArray(2)
 		GL.glBindVertexArray(0)
 
-	def setup_entity (self, entity):
+	def _setup_entity (self, entity):
 		m = create_transformation_matrix(entity.position,
 		                                 entity.rotation,
 		                                 entity.scale)
@@ -296,7 +391,7 @@ class SceneRenderer(QObject):
 		self._shader.setUniformValue('uniform_color', QVector3D(entity.color[0], entity.color[1], entity.color[2]))
 		self._shader.setUniformValue('model_matrix', QMatrix4x4(m.flatten().tolist()))
 
-	def create_shader (self):
+	def _create_shader (self):
 		self._shader = QOpenGLShaderProgram()
 		self._shader.addShaderFromSourceFile(QOpenGLShader.Vertex, 'shaders/OpenGL_4_1/vertex.glsl')
 		self._shader.addShaderFromSourceFile(QOpenGLShader.Fragment, 'shaders/OpenGL_4_1/fragment.glsl')
