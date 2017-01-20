@@ -55,6 +55,10 @@ class View(QQuickView):
 	def select_piece (self, index):
 		pass
 
+	@pyqtSlot(int)
+	def move_camera (self, key):
+		self._renderer.move_camera(key)
+
 	@pyqtSlot(int, int)
 	def rotate_camera (self, dx, dy):
 		self._renderer.rotate_camera(dx, dy)
@@ -72,6 +76,6 @@ class View(QQuickView):
 		self._game.on_clicked(button, x, y)
 
 	@pyqtSlot()
-	def reset_board(self):
+	def reset_board (self):
 		self._renderer.reset_board()
 		self._game.reset_board()
