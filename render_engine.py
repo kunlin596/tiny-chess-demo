@@ -76,18 +76,21 @@ class SceneRenderer(QObject):
 
 		self.set_viewport_size(self._window.size() * self._window.devicePixelRatio())
 		self._mesh_data[CUBE_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'cube', offset = 0.5)
-		# self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/king.obj', 'king')
-		# self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/queen.obj', 'queen')
-		# self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/bishop.obj', 'bishop')
-		# self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/knight.obj', 'knight')
-		# self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/tower.obj', 'tower')
-		# self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/pawn.obj', 'pawn')
-		self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/king.obj', 'king')
-		self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/queen.obj', 'queen')
-		self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/bishop.obj', 'bishop')
-		self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/knight.obj', 'knight')
-		self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/tower.obj', 'tower')
-		self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/pawn.obj', 'pawn')
+		if RENDER_CUBE_AS_PIECE:
+			self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'king', offset = 0.5)
+			self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'queen', offset = 0.5)
+			self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'bishop', offset = 0.5)
+			self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'knight', offset = 0.5)
+			self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'tower', offset = 0.5)
+			self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'pawn', offset = 0.5)
+		else:
+			self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'pawn')
+			self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/king.obj', 'king')
+			self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/queen.obj', 'queen')
+			self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/bishop.obj', 'bishop')
+			self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/knight.obj', 'knight')
+			self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/tower.obj', 'tower')
+			self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/pawn.obj', 'pawn')
 
 		MeshData.CheckData(self._mesh_data[CUBE_MODEL_INDEX])
 		MeshData.CheckData(self._mesh_data[CHESS_KING_MODEL_INDEX])
@@ -156,7 +159,7 @@ class SceneRenderer(QObject):
 					e = self._piece_entities[row][col]
 					if e is not None:
 						self.animate_select_piece(e)
-						self._title_entities[col + 8 * row].color = TILE_SELECTED_COLOR
+						self._title_entities[col + 8 * row].color = TILE_SELECTED_COLOR.copy()
 					# self.animate_selected_piece(e)
 
 				elif board_table[row][col].status == TILE_DESTINATION:

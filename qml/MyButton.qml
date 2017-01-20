@@ -1,28 +1,35 @@
 import QtQuick 2.0
 
-
 Rectangle {
-    id: object_list
+    id: my_button
     width: 100
+    height: 50
+
+    property alias text: text.text
+    property alias mouse_area: mouse_area
+
+    state: "Visible"
 
     gradient: static_color
     Gradient {
         id: static_color
-        GradientStop { position: 0.0; color: Qt.rgba(0.2, 0.2, 0.2, 0.8)}
+        GradientStop { position: 0.0; color: Qt.rgba(0.15, 0.15, 0.15, 0.8)}
         GradientStop { position: 0.66; color: Qt.rgba(0.1, 0.1, 0.1, 0.8)}
         GradientStop { position: 1.0; color: Qt.rgba(0.1, 0.1, 0.1, 0.8)}
     }
+    Gradient {
+        id: active_color
+        GradientStop { position: 0.0; color: Qt.rgba(0.5, 0.5, 0.7, 0.8)}
+        GradientStop { position: 0.66; color: Qt.rgba(0.1, 0.1, 0.1, 0.8)}
+        GradientStop { position: 1.0; color: Qt.rgba(0.0, 0.0, 0.0, 0.8)}
+    }
 
-    ListView {
-        id: listView
-        width: 100
-        anchors.fill:parent
-        clip: true
-
-        model: listModel
-        delegate: MyButton {
-            text: hour
-        }
+    Text {
+        id: text
+        text: 'Button'
+        anchors.centerIn: parent
+        font.pointSize: 10
+        color: 'white'
     }
 
     Image {
@@ -34,30 +41,33 @@ Rectangle {
         source: "shadow_long.png"
     }
 
-    ListModel {
-        id: listModel
-        Component.onCompleted: {
-            for (var i = 0; i < 10; i++) {
-                append(createListElement(i));
-            }
+    MouseArea {
+        id: mouse_area
+
+        anchors.fill: parent
+        hoverEnabled: true
+
+        onEntered: {
+            parent.gradient = active_color
         }
-        function createListElement(i) {
-            return {
-                hour: i
-            };
+
+        onExited: {
+            parent.gradient = static_color
         }
+
+        onClicked: { }
     }
 
     states: [
         State{
             name: "Visible"
-            PropertyChanges{target: object_list; opacity: 1.0}
-            PropertyChanges{target: object_list; visible: true}
+            PropertyChanges{target: my_button; opacity: 1.0}
+            PropertyChanges{target: my_button; visible: true}
         },
         State{
             name: "Invisible"
-            PropertyChanges{target: object_list; opacity: 0.0}
-            PropertyChanges{target: object_list; visible: false}
+            PropertyChanges{target: my_button; opacity: 0.0}
+            PropertyChanges{target: my_button; visible: false}
         }
     ]
     transitions: [
@@ -67,13 +77,13 @@ Rectangle {
 
             SequentialAnimation{
                NumberAnimation {
-                   target: object_list
+                   target: my_button
                    property: "opacity"
                    duration: 200
                    easing.type: Easing.InOutQuad
                }
                NumberAnimation {
-                   target: object_list
+                   target: my_button
                    property: "visible"
                    duration: 0
                }
@@ -84,17 +94,18 @@ Rectangle {
             to: "Visible"
             SequentialAnimation{
                NumberAnimation {
-                   target: object_list
+                   target: root
                    property: "visible"
                    duration: 0
                }
                NumberAnimation {
-                   target: object_list
+                   target: root
                    property: "opacity"
-                   duration: 200
+                   duration: 100
                    easing.type: Easing.InOutQuad
                }
             }
         }
     ]
+
 }

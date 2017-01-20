@@ -73,11 +73,17 @@ Item {
         id : control_panel
         width: 100.0
         height: parent.height
+        gradient: static_color
+        Gradient {
+            id: static_color
+            GradientStop { position: 0.0; color: Qt.rgba(0.15, 0.15, 0.15, 0.8)}
+            GradientStop { position: 0.66; color: Qt.rgba(0.1, 0.1, 0.1, 0.8)}
+            GradientStop { position: 1.0; color: Qt.rgba(0.1, 0.1, 0.1, 0.8)}
+        }
         anchors {
             top: parent.top
             left: parent.left
         }
-        color: Qt.rgba(0.2, 0.2, 0.2, 0.7)
         Image {
             id: menu_image_shadow
             anchors.top: parent.top
@@ -86,108 +92,97 @@ Item {
             z: 4
             source: "shadow_long.png"
         }
-    }
 
-    Button {
+        MyButton {
         id: edit_board_button
         text: 'Edit'
-        Button {
+        property var show_menu: false
+
+        ButtonWithMenu {
             id: change_color_button
-            text: 'Color'
-            opacity: 0.0
-            x: -100
-            active_color: Qt.rgba(0.9, 0.2, 0.0, 0.8)
+            show_menu: false
+            text: 'color'
             anchors {
                 top: parent.top
+                left: parent.right
             }
         }
-        Button {
+
+        ButtonWithMenu {
             id: change_position_button
-            text: 'Translate'
-            opacity: 0.0
-            x: -100
-            active_color: Qt.rgba(0.9, 0.2, 0.0, 0.8)
+            show_menu: false
+            text: 'position'
             anchors {
                 top: change_color_button.bottom
+                left: parent.right
             }
         }
-        Button {
-            id: change_orientation_button
-            text: 'Rotate'
-            opacity: 0.0
-            x: -100
-            active_color: Qt.rgba(0.9, 0.2, 0.0, 0.8)
+
+        ButtonWithMenu {
+            id: change_rotation_button
+            show_menu: false
+            text: 'rotate'
             anchors {
                 top: change_position_button.bottom
+                left: parent.right
             }
         }
-        Button {
+
+        ButtonWithMenu {
             id: change_scale_button
-            text: 'Scale'
-            opacity: 0.0
-            x: -100
-            active_color: Qt.rgba(0.9, 0.2, 0.0, 0.8)
+            show_menu: false
+            text: 'scale'
             anchors {
-                top: change_orientation_button.bottom
+                top: change_rotation_button.bottom
+                left: parent.right
             }
         }
-        Button {
+
+        ButtonWithMenu {
             id: add_button
-            text: 'Add'
-            opacity: 0.0
-            x: -100
-            active_color: Qt.rgba(0.9, 0.2, 0.0, 0.8)
+            show_menu: false
+            text: "Add"
             anchors {
                 top: change_scale_button.bottom
+                left: parent.right
             }
         }
-        Button {
+
+        ButtonWithMenu {
             id: delete_button
-            text: 'Delete'
-            opacity: 0.0
-            x: -100
-            active_color: Qt.rgba(0.9, 0.2, 0.0, 0.8)
+            show_menu: false
+            text: "Delete"
             anchors {
                 top: add_button.bottom
+                left: parent.right
             }
         }
+
         mouse_area {
             onClicked: {
-                if (change_color_button.opacity == 0.0) {
-                    change_color_button.opacity = 1.0
-                    change_position_button.opacity = 1.0
-                    change_orientation_button.opacity = 1.0
-                    change_scale_button.opacity = 1.0
-                    add_button.opacity = 1.0
-                    delete_button.opacity = 1.0
-
-                    change_color_button.x = 100
-                    change_position_button.x = 100
-                    change_orientation_button.x = 100
-                    change_scale_button.x = 100
-                    add_button.x = 100
-                    delete_button.x = 100
-
-                } else {
-                    change_color_button.opacity = 0.0
-                    change_position_button.opacity = 0.0
-                    change_orientation_button.opacity = 0.0
-                    change_scale_button.opacity = 0.0
-                    add_button.opacity = 0.0
-                    delete_button.opacity = 0.0
-
-                    change_color_button.x = -100
-                    change_position_button.x = -100
-                    change_orientation_button.x = -100
-                    change_scale_button.x = -100
-                    add_button.x = -100
-                    delete_button.x = -100
+                if (edit_board_button.show_menu == false) {
+                    change_color_button.state = "Visible"
+                    change_position_button.state = "Visible"
+                    change_rotation_button.state = "Visible"
+                    change_scale_button.state = "Visible"
+                    add_button.state = "Visible"
+                    delete_button.state = "Visible"
+                    edit_board_button.show_menu = true
+                }
+                else {
+                    change_color_button.state = "Invisible"
+                    change_position_button.state = "Invisible"
+                    change_rotation_button.state = "Invisible"
+                    change_scale_button.state = "Invisible"
+                    add_button.state = "Invisible"
+                    delete_button.state = "Invisible"
+                    edit_board_button.show_menu = false
                 }
             }
         }
     }
 
-    Button {
+        MyButton {
         id: reset_board_button
         anchors.top: edit_board_button.bottom
         text: 'Reset'
@@ -198,27 +193,33 @@ Item {
         }
     }
 
-    Button {
+        MyButton {
         id: list_button
         anchors.top: reset_board_button.bottom
         text: 'List'
+        property bool show_menu: false
+        ObjectList {
+            id: object_list
+            state: "Invisible"
+            height: 400
+            anchors {
+                top: parent.top
+                left: parent.right
+            }
+        }
+
         mouse_area {
             onClicked: {
-                if (object_list.opacity == 1.0) {
-                    object_list.x = -100
-                    object_list.opacity = 0.0
+                if (list_button.show_menu == false) {
+                    object_list.state = "Visible"
+                    list_button.show_menu = true
                 } else {
-                    object_list.x = 100
-                    object_list.opacity = 1.0
+                    object_list.state = "Invisible"
+                    list_button.show_menu = false
                 }
             }
         }
-        ObjectList {
-            id: object_list
-            height: root.height
-            opacity: 0.0
-            x: -100
-        }
-    }
 
+    }
+    }
 }

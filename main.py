@@ -5,10 +5,11 @@ from PyQt5.QtGui import QGuiApplication, QSurfaceFormat
 from PyQt5.QtQuick import QQuickView
 from PyQt5.QtQml import qmlRegisterType
 
-from model import ModelEntity, ModelEntityList
 from window import View
 
 if __name__ == '__main__':
+
+
 	f = QSurfaceFormat()
 	f.setVersion(4, 1)
 	f.setProfile(QSurfaceFormat.CoreProfile)
