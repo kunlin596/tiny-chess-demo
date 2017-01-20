@@ -54,6 +54,10 @@ class SceneRenderer(QObject):
 		self._tile_move_1 = QPropertyAnimation()
 		self._tile_move_2 = QPropertyAnimation()
 
+		self._piece_move_1 = QPropertyAnimation()  # color
+		self._piece_move_2 = QPropertyAnimation()  # position
+		self._piece_move_3 = QPropertyAnimation()  # scale
+
 	def initialize (self):
 
 		self.set_viewport_size(self._window.size() * self._window.devicePixelRatio())
@@ -64,12 +68,12 @@ class SceneRenderer(QObject):
 		# self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/knight.obj', 'knight')
 		# self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/tower.obj', 'tower')
 		# self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/pawn.obj', 'pawn')
-		self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'king', offset = 0.5)
-		self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'queen', offset = 0.5)
-		self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'bishop', offset = 0.5)
-		self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'knight', offset = 0.5)
-		self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'tower', offset = 0.5)
-		self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'pawn', offset = 0.5)
+		self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/king.obj', 'king')
+		self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/queen.obj', 'queen')
+		self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/bishop.obj', 'bishop')
+		self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/knight.obj', 'knight')
+		self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/tower.obj', 'tower')
+		self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/pawn.obj', 'pawn')
 
 		MeshData.CheckData(self._mesh_data[CUBE_MODEL_INDEX])
 		MeshData.CheckData(self._mesh_data[CHESS_KING_MODEL_INDEX])
@@ -135,14 +139,7 @@ class SceneRenderer(QObject):
 						self._tile_hover_2.start(policy = QPropertyAnimation.DeleteWhenStopped)
 
 				else:
-					if (row + col) % 2 == 0:
-						e.color[0] = 0.0
-						e.color[1] = 0.0
-						e.color[2] = 0.0
-					else:
-						e.color[0] = 1.0
-						e.color[1] = 1.0
-						e.color[2] = 1.0
+					e.color = e.original_color.copy()
 					e.position[1] = -0.25
 
 	def prepare_board_table (self, board_table):
@@ -151,59 +148,65 @@ class SceneRenderer(QObject):
 				if board_table[row][col].status == TILE_OCCUPIED:
 					e = self._piece_entities[row][col]
 					e.position = self._title_entities[col + 8 * row].position.copy()
-					e.position[1] += self._title_entities[col + 8 * row].position[1] + 6.0
-					e.scale = np.ones(shape = (3,)) * 8.0
+					e.position[1] += self._title_entities[col + 8 * row].position[1] + 1.5
+					e.scale = np.ones(shape = (3,)) * 12.0
+					e.color = e.original_color.copy()
 				elif board_table[row][col].status == TILE_SELECTED:
 					e = self._piece_entities[row][col]
-					if e is None:
-						continue
-					e.color = np.array([0.8, 0.5, 0.6])
-
-					self._tile_select_1 = QPropertyAnimation(e, str.encode('_position'))
-					self._tile_select_1.setDuration(50)
-					self._tile_select_1.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
-					self._tile_select_1.setEndValue(QVector3D(e.position[0], 20.0, e.position[2]))
-
-					self._tile_select_2 = QPropertyAnimation(e, str.encode('_scale'))
-					self._tile_select_2.setDuration(50)
-					self._tile_select_2.setStartValue(QVector3D(e.scale[0], e.scale[1], e.scale[2]))
-					self._tile_select_2.setEndValue(QVector3D(10.0, 10.0, 10.0))
-
-					self._tile_select_3 = QPropertyAnimation(e, str.encode('_rotation'))
-					self._tile_select_3.setDuration(50)
-					self._tile_select_3.setStartValue(QVector3D(e.rotation[0], e.rotation[1], e.rotation[2]))
-					self._tile_select_3.setEndValue(QVector3D(e.rotation[0], 360.0, e.rotation[2]))
-
-					self._tile_select_1.start(policy = QPropertyAnimation.DeleteWhenStopped)
-					self._tile_select_2.start(policy = QPropertyAnimation.DeleteWhenStopped)
-					self._tile_select_3.start(policy = QPropertyAnimation.DeleteWhenStopped)
+					if e is not None:
+						self.animate_select_piece(e)
 
 				elif board_table[row][col].status == TILE_DESTINATION:
-					start_r = None
-					start_c = None
-
-					for r in range(8):
-						for c in range(8):
-							if board_table[r][c].status == TILE_SELECTED:
-								start_r = r
-								start_c = c
-
+					start_r, start_c = board_table.selected
 					if start_r is None or start_r is None:
 						return
 
 					e = self._piece_entities[start_r][start_c]
-
 					self._piece_entities[start_r][start_c] = None
 					self._piece_entities[row][col] = e
 
-					e.position = self._title_entities[col + 8 * row].position.copy() + 6.0
+					# after the animation the position will be changed
+					self.animate_piece_move(e,
+					                        self._title_entities[start_c + 8 * start_r].position.copy(),
+					                        self._title_entities[col + 8 * row].position.copy())
+
 					board_table[start_r][start_c].status = TILE_EMPTY
 					board_table[row][col].status = TILE_OCCUPIED
+
+	def animate_select_piece (self, e):
+		e.color = e.select_color.copy()
+		self._tile_select_1 = QPropertyAnimation(e, str.encode('_position'))
+		self._tile_select_1.setDuration(50)
+		self._tile_select_1.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
+		self._tile_select_1.setEndValue(QVector3D(e.position[0], 10.0, e.position[2]))
+
+		self._tile_select_2 = QPropertyAnimation(e, str.encode('_scale'))
+		self._tile_select_2.setDuration(50)
+		self._tile_select_2.setStartValue(QVector3D(e.scale[0], e.scale[1], e.scale[2]))
+		self._tile_select_2.setEndValue(QVector3D(15.0, 15.0, 15.0))
+
+		self._tile_select_3 = QPropertyAnimation(e, str.encode('_rotation'))
+		self._tile_select_3.setDuration(50)
+		self._tile_select_3.setStartValue(QVector3D(e.rotation[0], e.rotation[1], e.rotation[2]))
+		self._tile_select_3.setEndValue(QVector3D(e.rotation[0], 360.0, e.rotation[2]))
+
+		self._tile_select_1.start(policy = QPropertyAnimation.DeleteWhenStopped)
+		self._tile_select_2.start(policy = QPropertyAnimation.DeleteWhenStopped)
+		self._tile_select_3.start(policy = QPropertyAnimation.DeleteWhenStopped)
+
+	def animate_piece_move (self, e, start, end):
+		print(e.position)
+		self._piece_move_1 = QPropertyAnimation(e, str.encode('_position'))
+		self._piece_move_1.setDuration(2000)
+		self._piece_move_1.setStartValue(QVector3D(start[0], start[1], start[2]))
+		self._piece_move_1.setEndValue(QVector3D(end[0], end[1], end[2]))
+		self._piece_move_1.start(policy = QPropertyAnimation.DeleteWhenStopped)
+		print('   ', e.position)
 
 	def render (self):
 		w = self._window.width()
 		h = self._window.height()
-		GL.glViewport(0, 0, w * 2, h * 2)
+		GL.glViewport(0, 0, w, h)
 		GL.glClearColor(0.5, 0.5, 0.5, 1)
 		GL.glEnable(GL.GL_DEPTH_TEST)
 		GL.glEnable(GL.GL_CULL_FACE)

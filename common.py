@@ -18,6 +18,7 @@ TILE_EMPTY          = 0
 TILE_OCCUPIED       = 1
 TILE_SELECTED       = 2
 TILE_DESTINATION    = 3
+TILE_ATTACKED       = 4
 
 # Entity enumerations
 BLACK_KING      = 1
@@ -53,3 +54,7 @@ WHITE_PAWN_5    = 33
 WHITE_PAWN_6    = 34
 WHITE_PAWN_7    = 35
 WHITE_PAWN_8    = 36
+
+# Player indices
+PLAYER_BLACK    = 0
+PLAYER_WHITE    = 1
