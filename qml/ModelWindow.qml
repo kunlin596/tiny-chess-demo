@@ -4,7 +4,6 @@ import QtQuick.Layouts 1.0
 import "componentCreation.js" as EntityCreationHelper
 
 Item {
-
     id: root
     width: 640
     height: 480
@@ -88,21 +87,10 @@ Item {
             z: 4
             source: "shadow_long.png"
         }
-
-//        MouseArea {
-//            anchors.fill: parent
-//            hoverEnabled: true
-//            onEntered: {
-//                parent.color = Qt.rgba(0.5, 0.5, 0.5, 0.7)
-//            }
-//            onExited: {
-//                parent.color = Qt.rgba(0.2, 0.2, 0.2, 0.7)
-//            }
-//        }
     }
 
     Button {
-        id: button1
+        id: edit_board_button
         text: 'Edit'
         Button {
             id: change_color_button
@@ -201,14 +189,19 @@ Item {
     }
 
     Button {
-        id: button2
-        anchors.top: button1.bottom
+        id: reset_board_button
+        anchors.top: edit_board_button.bottom
         text: 'Reset'
+        mouse_area {
+            onClicked: {
+                _window.reset_board()
+            }
+        }
     }
 
     Button {
         id: list_button
-        anchors.top: button2.bottom
+        anchors.top: reset_board_button.bottom
         text: 'List'
         mouse_area {
             onClicked: {

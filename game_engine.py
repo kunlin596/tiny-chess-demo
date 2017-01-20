@@ -21,6 +21,55 @@ class TileInfo(object):
 		self.piece = piece
 
 
+class PieceInfo(object):
+	def __init__ (self, id, player, role):
+		pass
+
+	def test_legal_move (self, row, col):
+		pass
+
+
+class TestMove(object):
+	@classmethod
+	def TestMove (cls, role, current_pos, target_pos):
+		if role == CHESS_KING_MODEL_INDEX:
+			TestMove.KingMove(current_pos, target_pos)
+		elif role == CHESS_QUEEN_MODEL_INDEX:
+			pass
+		elif role == CHESS_BISHOP_MODEL_INDEX:
+			pass
+		elif role == CHESS_KNIGHT_MODEL_INDEX:
+			pass
+		elif role == CHESS_TOWER_MODEL_INDEX:
+			pass
+		elif role == CHESS_PAWN_MODEL_INDEX:
+			pass
+
+	@classmethod
+	def KingMove (cls, current_pos, target_pos):
+		pass
+
+	@classmethod
+	def QueenMove (cls, current_pos, target_pos):
+		pass
+
+	@classmethod
+	def BishopMove (cls, current_pos, target_pos):
+		pass
+
+	@classmethod
+	def KnightMove (cls, current_pos, target_pos):
+		pass
+
+	@classmethod
+	def TowerMove (cls, current_pos, target_pos):
+		pass
+
+	@classmethod
+	def PawnMove (cls, current_pos, target_pos):
+		pass
+
+
 class GameEngine(object):
 	"""
 	This class is in charge of the whole logic in this program,
@@ -108,9 +157,6 @@ class GameEngine(object):
 				self._board_table[self._selected_tile[0]][self._selected_tile[1]].status = TILE_OCCUPIED
 				self._board_table[self._curr_row][self._curr_col].status = TILE_SELECTED
 				self._board_table.selected = [self._curr_row, self._curr_col]
-			# if target is different color:
-			# 	self._board_table[self._selected_tile[0]][self._selected_tile[1]].status = TILE_SELECTED
-			# 	self._board_table[self._curr_row][self._curr_col].status = TILE_DESTINATION
 			self._selected_tile[0] = self._curr_row
 			self._selected_tile[1] = self._curr_col
 
@@ -136,7 +182,7 @@ class GameEngine(object):
 	@pyqtSlot()
 	def reset_board (self):
 		self._hover_table = np.zeros(shape = (8, 8), dtype = np.int32)
-		self._board_table = [[TileInfo(TILE_EMPTY, None) for j in range(8)] for i in range(8)]
+		self._board_table = BoardTable()
 
 		self._board_table[1][0].piece = BLACK_PAWN_8
 		self._board_table[1][1].piece = BLACK_PAWN_7

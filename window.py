@@ -6,9 +6,9 @@ from render_engine import SceneRenderer
 from game_engine import GameEngine
 
 
-class EditorView(QQuickView):
+class View(QQuickView):
 	def __init__ (self, parent = None):
-		super(EditorView, self).__init__(parent)
+		super(View, self).__init__(parent)
 		self._renderer = None
 		self._camera = Camera()
 		self._renderer = SceneRenderer(self, self._camera)
@@ -43,25 +43,21 @@ class EditorView(QQuickView):
 		self._renderer.sync()
 		self.resetOpenGLState()
 
-	@pyqtSlot(int)
-	def add_geometry (self, geo_enum):
+	@pyqtSlot(int, int, int)
+	def add_piece (self, kind, row, col):
 		self._renderer.add_geometry(geo_enum)
 
 	@pyqtSlot(int)
-	def delete_geometry (self, index):
+	def delete_piece (self, index):
 		self._renderer.delete_geometry(index)
 
 	@pyqtSlot(int)
-	def select_obj (self, index = 0):
+	def select_piece (self, index):
 		pass
 
 	@pyqtSlot(int, int)
 	def rotate_camera (self, dx, dy):
 		self._renderer.rotate_camera(dx, dy)
-
-	@pyqtSlot(int)
-	def move_camera (self, key):
-		self._renderer.move_camera(key)
 
 	@pyqtSlot(int, int)
 	def set_mouse_position (self, x, y):
@@ -74,3 +70,8 @@ class EditorView(QQuickView):
 	@pyqtSlot(int, int, int)
 	def on_clicked (self, button, x, y):
 		self._game.on_clicked(button, x, y)
+
+	@pyqtSlot()
+	def reset_board(self):
+		self._renderer.reset_board()
+		self._game.reset_board()

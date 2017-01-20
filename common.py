@@ -62,7 +62,9 @@ PLAYER_BLACK = 0
 PLAYER_WHITE = 1
 
 # Rendering enumerations
-TILE_STATIC_SCALE = np.array([9.8, 1.0, 9.8])
+CLEAR_COLOR = np.zeros((3,)) + 0.4
+
+TILE_STATIC_SCALE = np.array([9.6, 0.5, 9.5])
 TILE_HOVER_Y_POSITION = 1.0
 TILE_HOVER_COLOR = np.array([1.0, 0.843, 0.0])
 

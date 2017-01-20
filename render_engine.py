@@ -313,7 +313,7 @@ class SceneRenderer(QObject):
 		w = self._window.width()
 		h = self._window.height()
 		GL.glViewport(0, 0, w, h)
-		GL.glClearColor(0.5, 0.5, 0.5, 1)
+		GL.glClearColor(CLEAR_COLOR[0], CLEAR_COLOR[1], CLEAR_COLOR[2], 1)
 		GL.glEnable(GL.GL_DEPTH_TEST)
 		GL.glEnable(GL.GL_CULL_FACE)
 		GL.glCullFace(GL.GL_BACK)
@@ -429,6 +429,11 @@ class SceneRenderer(QObject):
 	def checker_board_entities (self):
 		return self._title_entities
 
+	def reset_board(self):
+		self._entity_creator = EntityCreator(self._models)
+		self._entity_creator.create_checker_board(self._title_entities)
+		self._piece_entities =  [[None for i in range(8)] for j in range(8)]
+		self._entity_creator.create_chess_pieces(self._piece_entities, self._title_entities)
 
 class GpuManager(object):
 	POSITION_LOCATION = 0

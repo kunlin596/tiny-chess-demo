@@ -6,7 +6,7 @@ from PyQt5.QtQuick import QQuickView
 from PyQt5.QtQml import qmlRegisterType
 
 from model import ModelEntity, ModelEntityList
-from scene_view import EditorView
+from window import View
 
 if __name__ == '__main__':
 	f = QSurfaceFormat()
@@ -19,7 +19,7 @@ if __name__ == '__main__':
 	# qmlRegisterType(ModelEntity, 'MyEntity', 1, 0, 'Entity')
 	# qmlRegisterType(ModelEntityList, 'MyEntity', 1, 0, 'EntityList')
 
-	view = EditorView()
+	view = View()
 	view.setResizeMode(QQuickView.SizeRootObjectToView)  # Set for the object to resize correctly
 	view.setSource(QUrl('qml/ModelWindow.qml'))
 	view.show()

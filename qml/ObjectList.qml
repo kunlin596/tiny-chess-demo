@@ -29,13 +29,13 @@ Rectangle {
 
     Behavior on opacity {
         NumberAnimation {
-            duration: 300
+            duration: 100
         }
     }
 
     Behavior on x {
         NumberAnimation {
-            duration: 300
+            duration: 100
         }
     }
 
