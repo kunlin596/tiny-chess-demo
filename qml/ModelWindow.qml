@@ -11,7 +11,6 @@ Item {
 
     focus: true
 
-
     Keys.onPressed: {
         switch(event.key) {
             case Qt.Key_W:

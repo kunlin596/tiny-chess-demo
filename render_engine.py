@@ -156,6 +156,7 @@ class SceneRenderer(QObject):
 					e = self._piece_entities[row][col]
 					if e is not None:
 						self.animate_select_piece(e)
+						self._title_entities[col + 8 * row].color = TILE_SELECTED_COLOR
 					# self.animate_selected_piece(e)
 
 				elif board_table[row][col].status == TILE_DESTINATION:
@@ -429,11 +430,12 @@ class SceneRenderer(QObject):
 	def checker_board_entities (self):
 		return self._title_entities
 
-	def reset_board(self):
+	def reset_board (self):
 		self._entity_creator = EntityCreator(self._models)
 		self._entity_creator.create_checker_board(self._title_entities)
-		self._piece_entities =  [[None for i in range(8)] for j in range(8)]
+		self._piece_entities = [[None for i in range(8)] for j in range(8)]
 		self._entity_creator.create_chess_pieces(self._piece_entities, self._title_entities)
+
 
 class GpuManager(object):
 	POSITION_LOCATION = 0

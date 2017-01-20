@@ -45,11 +45,11 @@ class View(QQuickView):
 
 	@pyqtSlot(int, int, int)
 	def add_piece (self, kind, row, col):
-		self._renderer.add_geometry(geo_enum)
+		pass
 
 	@pyqtSlot(int)
 	def delete_piece (self, index):
-		self._renderer.delete_geometry(index)
+		pass
 
 	@pyqtSlot(int)
 	def select_piece (self, index):
@@ -79,3 +79,15 @@ class View(QQuickView):
 	def reset_board (self):
 		self._renderer.reset_board()
 		self._game.reset_board()
+
+	@pyqtSlot(float, float, float)
+	def change_scale (self, x, y, z):
+		pass
+
+	@pyqtSlot(float, float, float)
+	def change_color (self, r, g, b):
+		pass
+
+	@pyqtSlot(float, float, float)
+	def change_rotation (self, rx, ry, rz):
+		pass
