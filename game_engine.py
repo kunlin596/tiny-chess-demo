@@ -122,6 +122,7 @@ class GameEngine(object):
 			if self._board_table[self._curr_row][self._curr_col].status == TILE_SELECTED:
 				self._board_table[self._curr_row][self._curr_col].status = TILE_OCCUPIED
 				self._has_selected = False
+				self._board_table.selected = [None, None]
 
 	def on_keyboard (self, key):
 		pass

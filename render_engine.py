@@ -58,6 +58,12 @@ class SceneRenderer(QObject):
 		self._piece_move_2 = QPropertyAnimation()  # position
 		self._piece_move_3 = QPropertyAnimation()  # scale
 
+		self._animation_finished = True
+
+	@pyqtSlot()
+	def animation_finished (self):
+		self._animation_finished = True
+
 	def initialize (self):
 
 		self.set_viewport_size(self._window.size() * self._window.devicePixelRatio())
@@ -126,18 +132,7 @@ class SceneRenderer(QObject):
 				e = self._title_entities[col + 8 * row]
 				if hover_table[row][col] > 0.0:
 					if e.position[1] < 0.0:
-						self._tile_hover_1 = QPropertyAnimation(e, str.encode('_color'))
-						self._tile_hover_1.setDuration(100)
-						self._tile_hover_1.setStartValue(QVector3D(e.color[0], e.color[1], e.color[2]))
-						self._tile_hover_1.setEndValue(QVector3D(0.8, 0.1, 0.1))
-
-						self._tile_hover_2 = QPropertyAnimation(e, str.encode('_position'))
-						self._tile_hover_2.setDuration(100)
-						self._tile_hover_2.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
-						self._tile_hover_2.setEndValue(QVector3D(e.position[0], 2.0, e.position[2]))
-						self._tile_hover_1.start(policy = QPropertyAnimation.DeleteWhenStopped)
-						self._tile_hover_2.start(policy = QPropertyAnimation.DeleteWhenStopped)
-
+						self.animate_hover_tile(e)
 				else:
 					e.color = e.original_color.copy()
 					e.position[1] = -0.25
@@ -145,12 +140,10 @@ class SceneRenderer(QObject):
 	def prepare_board_table (self, board_table):
 		for row in range(8):
 			for col in range(8):
-				if board_table[row][col].status == TILE_OCCUPIED:
-					e = self._piece_entities[row][col]
-					e.position = self._title_entities[col + 8 * row].position.copy()
-					e.position[1] += self._title_entities[col + 8 * row].position[1] + 1.5
-					e.scale = np.ones(shape = (3,)) * 12.0
-					e.color = e.original_color.copy()
+				if board_table[row][col].status == TILE_EMPTY:
+					continue
+				elif board_table[row][col].status == TILE_OCCUPIED and self._animation_finished:
+					self.reset_piece(self._piece_entities[row][col], row, col)
 				elif board_table[row][col].status == TILE_SELECTED:
 					e = self._piece_entities[row][col]
 					if e is not None:
@@ -158,20 +151,40 @@ class SceneRenderer(QObject):
 
 				elif board_table[row][col].status == TILE_DESTINATION:
 					start_r, start_c = board_table.selected
+					board_table[start_r][start_c].status = TILE_EMPTY
+					board_table[row][col].status = TILE_OCCUPIED
 					if start_r is None or start_r is None:
-						return
+						continue
 
 					e = self._piece_entities[start_r][start_c]
 					self._piece_entities[start_r][start_c] = None
 					self._piece_entities[row][col] = e
+					e.color = e.original_color
 
 					# after the animation the position will be changed
 					self.animate_piece_move(e,
-					                        self._title_entities[start_c + 8 * start_r].position.copy(),
-					                        self._title_entities[col + 8 * row].position.copy())
+					                        self._title_entities[start_c + 8 * start_r].position,
+					                        self._title_entities[col + 8 * row].position)
+					self._animation_finished = False
 
-					board_table[start_r][start_c].status = TILE_EMPTY
-					board_table[row][col].status = TILE_OCCUPIED
+	def reset_piece (self, e, row, col):
+		e.position = self._title_entities[col + 8 * row].position.copy()
+		e.position[1] += self._title_entities[col + 8 * row].position[1] + 3.0
+		e.scale = np.ones(shape = (3,)) * 12.0
+		e.color = e.original_color.copy()
+
+	def animate_hover_tile (self, e):
+		self._tile_hover_1 = QPropertyAnimation(e, str.encode('_color'))
+		self._tile_hover_1.setDuration(100)
+		self._tile_hover_1.setStartValue(QVector3D(e.color[0], e.color[1], e.color[2]))
+		self._tile_hover_1.setEndValue(QVector3D(0.8, 0.1, 0.1))
+
+		self._tile_hover_2 = QPropertyAnimation(e, str.encode('_position'))
+		self._tile_hover_2.setDuration(100)
+		self._tile_hover_2.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
+		self._tile_hover_2.setEndValue(QVector3D(e.position[0], 1.0, e.position[2]))
+		self._tile_hover_1.start(policy = QPropertyAnimation.DeleteWhenStopped)
+		self._tile_hover_2.start(policy = QPropertyAnimation.DeleteWhenStopped)
 
 	def animate_select_piece (self, e):
 		e.color = e.select_color.copy()
@@ -195,13 +208,13 @@ class SceneRenderer(QObject):
 		self._tile_select_3.start(policy = QPropertyAnimation.DeleteWhenStopped)
 
 	def animate_piece_move (self, e, start, end):
-		print(e.position)
 		self._piece_move_1 = QPropertyAnimation(e, str.encode('_position'))
-		self._piece_move_1.setDuration(2000)
-		self._piece_move_1.setStartValue(QVector3D(start[0], start[1], start[2]))
+		self._piece_move_1.finished.connect(self.animation_finished)
+		self._piece_move_1.setDuration(200)
+		self._piece_move_1.setStartValue(QVector3D(start[0], start[1] + 6.0, start[2]))
 		self._piece_move_1.setEndValue(QVector3D(end[0], end[1], end[2]))
-		self._piece_move_1.start(policy = QPropertyAnimation.DeleteWhenStopped)
-		print('   ', e.position)
+		self._piece_move_1.start()
+		self._animation_finished = False
 
 	def render (self):
 		w = self._window.width()
@@ -248,7 +261,6 @@ class SceneRenderer(QObject):
 		for row in range(8):
 			for col in range(8):
 				e = self._piece_entities[row][col]
-				# e = self._title_entities[col + 8 * row]
 				if e is None:
 					continue
 				self.setup_model(e.model)
