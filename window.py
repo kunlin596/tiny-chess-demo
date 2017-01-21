@@ -1,4 +1,4 @@
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtQuick import QQuickView
 
 from entity import *
@@ -7,6 +7,11 @@ from game_engine import GameEngine
 
 
 class View(QQuickView):
+	colorChanged = pyqtSignal(float, float, float)
+	positionChanged = pyqtSignal(float, float, float)
+	rotationChanged = pyqtSignal(float, float, float)
+	scaleChanged = pyqtSignal(float, float, float)
+
 	def __init__ (self, parent = None):
 		super(View, self).__init__(parent)
 		self._renderer = None
@@ -24,6 +29,8 @@ class View(QQuickView):
 		# self.rootContext().setContextProperty("_checker_board_entities", self._renderer._title_entities)
 
 		self.setClearBeforeRendering(False)  # otherwise quick would clear everything we render
+
+		self._game.delete_entity.connect(self._renderer.on_delete_entity)
 
 	def initialize_scene (self):
 		self._renderer.initialize()
@@ -80,14 +87,40 @@ class View(QQuickView):
 		self._renderer.reset_board()
 		self._game.reset_board()
 
+	# Receive signals from QML
 	@pyqtSlot(float, float, float)
-	def change_scale (self, x, y, z):
-		pass
+	def onScaleChanged (self, x, y, z):
+		self._renderer.on_scale_changed(x, y, z)
 
 	@pyqtSlot(float, float, float)
-	def change_color (self, r, g, b):
-		pass
+	def onPositionChanged (self, x, y, z):
+		self._renderer.on_position_changed(x, y, z)
 
 	@pyqtSlot(float, float, float)
-	def change_rotation (self, rx, ry, rz):
-		pass
+	def onColorChanged (self, r, g, b):
+		self._renderer.on_color_changed(r, g, b)
+
+	@pyqtSlot(float, float, float)
+	def onRotationChanged (self, rx, ry, rz):
+		self._renderer.on_rotation_changed(rx, ry, rz)
+
+	# Send signals to QML
+	@pyqtSlot(float, float, float)
+	def on_selection_color_changed (self, r, g, b):
+		self.colorChanged.emit(r, g, b)
+
+	@pyqtSlot(float, float, float)
+	def on_selection_position_changed (self, x, y, z):
+		self.positionChanged.emit(x, y, z)
+
+	@pyqtSlot(float, float, float)
+	def on_selection_rotation_changed (self, rx, ry, rz):
+		self.rotationChanged.emit(rx, ry, rz)
+
+	@pyqtSlot(float, float, float)
+	def on_selection_scale_changed (self, x, y, z):
+		self.scaleChanged.emit(x, y, z)
+
+	@pyqtSlot()
+	def on_delete_current_selection (self):
+		self._game.delete_current_selection()

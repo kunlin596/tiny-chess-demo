@@ -1,5 +1,6 @@
 from entity import *
 from common import *
+from PyQt5.QtCore import pyqtSignal
 
 
 class BoardTable(object):
@@ -22,6 +23,8 @@ class TileInfo(object):
 
 
 class PieceInfo(object):
+	# TODO
+
 	def __init__ (self, id, player, role):
 		pass
 
@@ -30,6 +33,8 @@ class PieceInfo(object):
 
 
 class TestMove(object):
+	# TODO
+
 	@classmethod
 	def TestMove (cls, role, current_pos, target_pos):
 		if role == CHESS_KING_MODEL_INDEX:
@@ -70,13 +75,16 @@ class TestMove(object):
 		pass
 
 
-class GameEngine(object):
+class GameEngine(QObject):
+	delete_entity = pyqtSignal(int, int)
+
 	"""
 	This class is in charge of the whole logic in this program,
 	It updates the table and manages the rules and then update renderer
 	"""
 
-	def __init__ (self, window, camera):
+	def __init__ (self, window, camera, parent = None):
+		super(GameEngine, self).__init__(parent)
 		self._window = window
 		self._camera = camera
 		self._hover_table = np.zeros(shape = (8, 8), dtype = np.int32)
@@ -179,7 +187,6 @@ class GameEngine(object):
 	def board_table (self):
 		return self._board_table
 
-	@pyqtSlot()
 	def reset_board (self):
 		self._hover_table = np.zeros(shape = (8, 8), dtype = np.int32)
 		self._board_table = BoardTable()
@@ -233,3 +240,10 @@ class GameEngine(object):
 
 		self._has_selected = False
 		self._selected_tile = [None, None]
+
+	def delete_current_selection (self):
+		if self._has_selected:
+			self._has_selected = False
+			self._board_table[self._selected_tile[0]][self._selected_tile[1]].status = TILE_EMPTY
+			self._board_table.selected = [None, None]
+			self.delete_entity.emit(self._selected_tile[0], self._selected_tile[1])

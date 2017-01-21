@@ -42,9 +42,7 @@ Item {
 
         hoverEnabled: true
 
-        onPressed: {
-            click_pos = Qt.point(mouse.x,mouse.y);
-        }
+        onPressed: { click_pos = Qt.point(mouse.x,mouse.y); }
 
         onClicked: {
             if (mouse.button == Qt.LeftButton) {
@@ -94,132 +92,186 @@ Item {
         }
 
         MyButton {
-        id: edit_board_button
-        text: 'Edit'
-        property var show_menu: false
+            id: edit_board_button
+            text: 'Edit'
+            property var show_menu: false
 
-        ButtonWithMenu {
-            id: change_color_button
-            show_menu: false
-            text: 'color'
-            anchors {
-                top: parent.top
-                left: parent.right
-            }
-        }
-
-        ButtonWithMenu {
-            id: change_position_button
-            show_menu: false
-            text: 'position'
-            anchors {
-                top: change_color_button.bottom
-                left: parent.right
-            }
-        }
-
-        ButtonWithMenu {
-            id: change_rotation_button
-            show_menu: false
-            text: 'rotate'
-            anchors {
-                top: change_position_button.bottom
-                left: parent.right
-            }
-        }
-
-        ButtonWithMenu {
-            id: change_scale_button
-            show_menu: false
-            text: 'scale'
-            anchors {
-                top: change_rotation_button.bottom
-                left: parent.right
-            }
-        }
-
-        ButtonWithMenu {
-            id: add_button
-            show_menu: false
-            text: "Add"
-            anchors {
-                top: change_scale_button.bottom
-                left: parent.right
-            }
-        }
-
-        ButtonWithMenu {
-            id: delete_button
-            show_menu: false
-            text: "Delete"
-            anchors {
-                top: add_button.bottom
-                left: parent.right
-            }
-        }
-
-        mouse_area {
-            onClicked: {
-                if (edit_board_button.show_menu == false) {
-                    change_color_button.state = "Visible"
-                    change_position_button.state = "Visible"
-                    change_rotation_button.state = "Visible"
-                    change_scale_button.state = "Visible"
-                    add_button.state = "Visible"
-                    delete_button.state = "Visible"
-                    edit_board_button.show_menu = true
+            ButtonWithMenu {
+                id: change_color_button
+                show_menu: false
+                text: 'color'
+                anchors {
+                    top: parent.top
+                    left: parent.right
                 }
-                else {
-                    change_color_button.state = "Invisible"
-                    change_position_button.state = "Invisible"
-                    change_rotation_button.state = "Invisible"
-                    change_scale_button.state = "Invisible"
-                    add_button.state = "Invisible"
-                    delete_button.state = "Invisible"
-                    edit_board_button.show_menu = false
+
+                slider {
+                    text1: 'R'
+                    text2: 'G'
+                    text3: 'B'
+                    value1: 0.0
+                    value2: 0.0
+                    value3: 0.0
+                    min_val: 0.0
+                    max_val: 1.0
                 }
             }
+
+            ButtonWithMenu {
+                id: change_position_button
+                show_menu: false
+                text: 'translation'
+                anchors {
+                    top: change_color_button.bottom
+                    left: parent.right
+                }
+                slider {
+                    text1: 'X'
+                    text2: 'Y'
+                    text3: 'Z'
+                    value1: 0.0
+                    value2: 0.0
+                    value3: 0.0
+                    min_val: -50.0
+                    max_val: 50.0
+                }
+            }
+
+            ButtonWithMenu {
+                id: change_rotation_button
+                show_menu: false
+                text: 'rotate'
+                anchors {
+                    top: change_position_button.bottom
+                    left: parent.right
+                }
+
+                slider {
+                    text1: 'Rx'
+                    text2: 'Ry'
+                    text3: 'Rz'
+                    value1: 0.0
+                    value2: 0.0
+                    value3: 0.0
+                    min_val: 0.0
+                    max_val: 360.0
+                }
+            }
+
+            ButtonWithMenu {
+                id: change_scale_button
+                show_menu: false
+                text: 'scale'
+                anchors {
+                    top: change_rotation_button.bottom
+                    left: parent.right
+                }
+                slider {
+                    text1: 'X'
+                    text2: 'Y'
+                    text3: 'Z'
+                    value1: 0.0
+                    value2: 0.0
+                    value3: 0.0
+                    min_val: 10.0
+                    max_val: 50.0
+                }
+            }
+
+            MyButton {
+                id: add_button
+                text: "Add"
+                state: "Invisible"
+                anchors {
+                    top: change_scale_button.bottom
+                    left: parent.right
+                }
+            }
+
+            MyButton {
+                id: delete_button
+                text: "Delete"
+                state: "Invisible"
+                anchors {
+                    top: add_button.bottom
+                    left: parent.right
+                }
+
+                mouse_area.onClicked: _window.on_delete_current_selection()
+            }
+
+            mouse_area {
+                onClicked: {
+                    if (edit_board_button.show_menu == false) {
+                        change_color_button.state = "Visible"
+                        change_position_button.state = "Visible"
+                        change_rotation_button.state = "Visible"
+                        change_scale_button.state = "Visible"
+                        add_button.state = "Visible"
+                        delete_button.state = "Visible"
+                        edit_board_button.show_menu = true
+                    }
+                    else {
+                        change_color_button.state = "Invisible"
+                        change_position_button.state = "Invisible"
+                        change_rotation_button.state = "Invisible"
+                        change_scale_button.state = "Invisible"
+                        add_button.state = "Invisible"
+                        delete_button.state = "Invisible"
+                        edit_board_button.show_menu = false
+                    }
+                }
+            }
+
+            Component.onCompleted: {
+                change_color_button.slider.valueChanged.connect(_window.onColorChanged)
+                change_position_button.slider.valueChanged.connect(_window.onPositionChanged)
+                change_rotation_button.slider.valueChanged.connect(_window.onRotationChanged)
+                change_scale_button.slider.valueChanged.connect(_window.onScaleChanged)
+
+                _window.colorChanged.connect(change_color_button.onValueChanged)
+                _window.positionChanged.connect(change_position_button.onValueChanged)
+                _window.rotationChanged.connect(change_rotation_button.onValueChanged)
+                _window.scaleChanged.connect(change_scale_button.onValueChanged)
+            }
         }
-    }
 
         MyButton {
         id: reset_board_button
         anchors.top: edit_board_button.bottom
         text: 'Reset'
         mouse_area {
-            onClicked: {
-                _window.reset_board()
-            }
+            onClicked: _window.reset_board()
         }
     }
 
         MyButton {
-        id: list_button
-        anchors.top: reset_board_button.bottom
-        text: 'List'
-        property bool show_menu: false
-        ObjectList {
-            id: object_list
-            state: "Invisible"
-            height: 400
-            anchors {
-                top: parent.top
-                left: parent.right
-            }
-        }
-
-        mouse_area {
-            onClicked: {
-                if (list_button.show_menu == false) {
-                    object_list.state = "Visible"
-                    list_button.show_menu = true
-                } else {
-                    object_list.state = "Invisible"
-                    list_button.show_menu = false
+            id: list_button
+            anchors.top: reset_board_button.bottom
+            text: 'List'
+            property bool show_menu: false
+            ObjectList {
+                id: object_list
+                state: "Invisible"
+                height: 400
+                anchors {
+                    top: parent.top
+                    left: parent.right
                 }
             }
-        }
 
-    }
+            mouse_area {
+                onClicked: {
+                    if (list_button.show_menu == false) {
+                        object_list.state = "Visible"
+                        list_button.show_menu = true
+                    } else {
+                        object_list.state = "Invisible"
+                        list_button.show_menu = false
+                    }
+                }
+            }
+
+        }
     }
 }

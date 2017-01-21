@@ -46,9 +46,9 @@ class SceneRenderer(QObject):
 		self._tile_hover_1 = QPropertyAnimation()
 		self._tile_hover_2 = QPropertyAnimation()
 
-		self._tile_select_1 = QPropertyAnimation()
-		self._tile_select_2 = QPropertyAnimation()
-		self._tile_select_3 = QPropertyAnimation()
+		self._piece_select_animation_group = QParallelAnimationGroup()
+		self._piece_select_animation = []
+
 		self._piece_selected_1 = QPropertyAnimation()
 		self._piece_selected_2 = QPropertyAnimation()
 
@@ -63,6 +63,13 @@ class SceneRenderer(QObject):
 
 		self._move_animation_finished = True
 		self._reset_animation_finished = True
+
+		self._custom_color_ptr = np.zeros((3,))
+		self._custom_position_ptr = np.zeros((3,))
+		self._custom_rotation_ptr = np.zeros((3,))
+		self._custom_scale_ptr = np.zeros((3,))
+
+		self._selected = [-1, -1]
 
 	@pyqtSlot()
 	def move_animation_finished (self):
@@ -91,13 +98,14 @@ class SceneRenderer(QObject):
 			self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/tower.obj', 'tower')
 			self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/pawn.obj', 'pawn')
 
-		MeshData.CheckData(self._mesh_data[CUBE_MODEL_INDEX])
-		MeshData.CheckData(self._mesh_data[CHESS_KING_MODEL_INDEX])
-		MeshData.CheckData(self._mesh_data[CHESS_QUEEN_MODEL_INDEX])
-		MeshData.CheckData(self._mesh_data[CHESS_BISHOP_MODEL_INDEX])
-		MeshData.CheckData(self._mesh_data[CHESS_KNIGHT_MODEL_INDEX])
-		MeshData.CheckData(self._mesh_data[CHESS_TOWER_MODEL_INDEX])
-		MeshData.CheckData(self._mesh_data[CHESS_PAWN_MODEL_INDEX])
+			# MeshData.CheckData(self._mesh_data[CUBE_MODEL_INDEX])
+			# MeshData.CheckData(self._mesh_data[CHESS_KING_MODEL_INDEX])
+			# MeshData.CheckData(self._mesh_data[CHESS_QUEEN_MODEL_INDEX])
+			# MeshData.CheckData(self._mesh_data[CHESS_BISHOP_MODEL_INDEX])
+			# MeshData.CheckData(self._mesh_data[CHESS_KNIGHT_MODEL_INDEX])
+			# MeshData.CheckData(self._mesh_data[CHESS_TOWER_MODEL_INDEX])
+			# MeshData.CheckData(self._mesh_data[CHESS_PAWN_MODEL_INDEX])
+			pass
 
 		self._create_shader()
 
@@ -148,6 +156,7 @@ class SceneRenderer(QObject):
 					e.position[1] = -0.25
 
 	def prepare_pieces (self, board_table):
+
 		for row in range(8):
 			for col in range(8):
 				if board_table[row][col].status == TILE_EMPTY:
@@ -157,6 +166,19 @@ class SceneRenderer(QObject):
 				elif board_table[row][col].status == TILE_SELECTED:
 					e = self._piece_entities[row][col]
 					if e is not None:
+
+						if self._selected != board_table.selected:
+							self.change_current_selection(e)
+						else:
+							SceneRenderer._ChangeCustomAttribPtr(e.custom_color, self._custom_color_ptr,
+							                                     self._window.on_selection_color_changed)
+							SceneRenderer._ChangeCustomAttribPtr(e.custom_postion, self._custom_position_ptr,
+							                                     self._window.on_selection_position_changed)
+							SceneRenderer._ChangeCustomAttribPtr(e.custom.rotation, self._custom_rotation_ptr,
+							                                     self._window.on_selection_rotation_changed)
+							SceneRenderer._ChangeCustomAttribPtr(e.custom.scale, self._custom_scale_ptr,
+							                                     self._window.on_selection_scale_changed)
+
 						self.animate_select_piece(e)
 						self._title_entities[col + 8 * row].color = TILE_SELECTED_COLOR.copy()
 					# self.animate_selected_piece(e)
@@ -184,7 +206,7 @@ class SceneRenderer(QObject):
 		e.position = self._title_entities[col + 8 * row].position.copy()
 		e.position[1] += self._title_entities[col + 8 * row].position[1] + PIECE_STATIC_Y_OFFSET
 		e.scale = PIECE_STATIC_SCALE.copy()
-		e.color = e.original_color
+		e.color = e.original_color.copy()
 		e.rotation = np.zeros((3,))
 
 	def animate_hover_tile (self, e):
@@ -205,31 +227,48 @@ class SceneRenderer(QObject):
 		self._tile_hover_animation_group.start(policy = QParallelAnimationGroup.DeleteWhenStopped)
 
 	def animate_select_piece (self, e):
-		e.color = e.select_color.copy()
-		self._tile_select_1 = QPropertyAnimation(e, str.encode('_position'))
-		self._tile_select_1.setDuration(50)
-		self._tile_select_1.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
-		self._tile_select_1.setEndValue(QVector3D(e.position[0], PIECE_SELECTION_Y_VALUE, e.position[2]))
+		self._piece_select_animation_group = QParallelAnimationGroup()
 
-		self._tile_select_2 = QPropertyAnimation(e, str.encode('_scale'))
-		self._tile_select_2.setDuration(50)
-		self._tile_select_2.setStartValue(QVector3D(e.scale[0], e.scale[1], e.scale[2]))
-		self._tile_select_2.setEndValue(
-			QVector3D(PIECE_SELECTION_SCALE[0], PIECE_SELECTION_SCALE[1], PIECE_SELECTION_SCALE[2]))
+		a1 = QPropertyAnimation(e, str.encode('_position'))
+		a1.setDuration(50)
+		a1.setStartValue(QVector3D(e.position[0], e.position[1], e.position[2]))
+		a1.setEndValue(
+			QVector3D(e.custom_position[0], e.custom_position[1], e.custom_position[2]))
+
+		a2 = QPropertyAnimation(e, str.encode('_scale'))
+		a2.setDuration(50)
+		a2.setStartValue(QVector3D(e.scale[0], e.scale[1], e.scale[2]))
+		a2.setEndValue(
+			QVector3D(e.custom_scale[0], e.custom_scale[1], e.custom_scale[2]))
 
 		if e.player == PLAYER_BLACK:
 			angle = 45.0
 		elif e.player == PLAYER_WHITE:
 			angle = -45.0
 
-		self._tile_select_3 = QPropertyAnimation(e, str.encode('_rotation'))
-		self._tile_select_3.setDuration(100)
-		self._tile_select_3.setStartValue(QVector3D(e.rotation[0], e.rotation[1], e.rotation[2]))
-		self._tile_select_3.setEndValue(QVector3D(angle, e.rotation[1], e.rotation[2]))
+		a3 = QPropertyAnimation(e, str.encode('_rotation'))
+		a3.setDuration(100)
+		a3.setStartValue(QVector3D(e.rotation[0], e.rotation[1], e.rotation[2]))
+		a3.setEndValue(
+			QVector3D(e.custom_rotation[0], e.custom_rotation[1], e.custom_rotation[2]))
 
-		self._tile_select_1.start(policy = QPropertyAnimation.DeleteWhenStopped)
-		self._tile_select_2.start(policy = QPropertyAnimation.DeleteWhenStopped)
-		self._tile_select_3.start(policy = QPropertyAnimation.DeleteWhenStopped)
+		a4 = QPropertyAnimation(e, str.encode('_color'))
+		a4.setDuration(100)
+		a4.setStartValue(QVector3D(e.color[0], e.color[1], e.color[2]))
+		a4.setEndValue(
+			QVector3D(e.custom_color[0], e.custom_color[1], e.custom_color[2]))
+
+		self._piece_select_animation.append(a1)
+		self._piece_select_animation.append(a2)
+		self._piece_select_animation.append(a3)
+		self._piece_select_animation.append(a4)
+
+		self._piece_select_animation_group.addAnimation(a1)
+		self._piece_select_animation_group.addAnimation(a2)
+		self._piece_select_animation_group.addAnimation(a3)
+		self._piece_select_animation_group.addAnimation(a4)
+
+		self._piece_select_animation_group.start(policy = QParallelAnimationGroup.DeleteWhenStopped)
 
 	def animate_selected_piece (self, e):
 		self._piece_selected_1 = QPropertyAnimation(e, str.encode('_rotation'))
@@ -437,6 +476,66 @@ class SceneRenderer(QObject):
 		self._entity_creator.create_checker_board(self._title_entities)
 		self._piece_entities = [[None for i in range(8)] for j in range(8)]
 		self._entity_creator.create_chess_pieces(self._piece_entities, self._title_entities)
+
+	def on_color_changed (self, r, g, b):
+		SceneRenderer._AssignCustomAttribBuffer(self._custom_color_ptr, [r, g, b])
+
+	def on_position_changed (self, x, y, z):
+		SceneRenderer._AssignCustomAttribBuffer(self._custom_position_ptr, [x, y, z])
+
+	def on_rotation_changed (self, rx, ry, rz):
+		SceneRenderer._AssignCustomAttribBuffer(self._custom_rotation_ptr, [rx, ry, rz])
+
+	def on_scale_changed (self, x, y, z):
+		SceneRenderer._AssignCustomAttribBuffer(self._custom_scale_ptr, [x, y, z])
+
+	def on_added (self):
+		pass
+
+	@staticmethod
+	def _AssignCustomAttribBuffer (buf, vals):
+		buf[0] = vals[0] if buf[0] != vals[0] else buf[0]
+		buf[1] = vals[1] if buf[1] != vals[1] else buf[1]
+		buf[2] = vals[2] if buf[2] != vals[2] else buf[2]
+
+	@staticmethod
+	def _ChangeCustomAttribPtr (attrib, buf, change_func):
+		"""
+		Compare the current attrib and the buf, if they are not the same, the change_func will be called
+		:param attrib:
+		:param buf:
+		:param change_func:
+		:return:
+		"""
+		if not (attrib == buf).all():
+			attrib = buf.copy()
+			change_func(attrib[0],
+			            attrib[1],
+			            attrib[2])
+
+	def change_current_selection (self, e):
+		self._custom_color_ptr = e.custom_color
+		self._custom_position_ptr = e.custom_position
+		self._custom_rotation_ptr = e.custom_rotation
+		self._custom_scale_ptr = e.custom_scale
+		self._window.on_selection_color_changed(e.custom_color[0],
+		                                        e.custom_color[1],
+		                                        e.custom_color[2])
+		self._window.on_selection_position_changed(e.custom_position[0],
+		                                           e.custom_position[1],
+		                                           e.custom_position[2])
+		self._window.on_selection_rotation_changed(e.custom_rotation[0],
+		                                           e.custom_rotation[1],
+		                                           e.custom_rotation[2])
+		self._window.on_selection_scale_changed(e.custom_scale[0],
+		                                        e.custom_scale[1],
+		                                        e.custom_scale[2])
+
+	@pyqtSlot(int, int)
+	def on_delete_entity (self, row, col):
+		e = self._piece_entities[row][col]
+		self._piece_entities[row][col] = None
+		del e
 
 
 class GpuManager(object):

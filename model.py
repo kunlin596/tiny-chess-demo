@@ -305,12 +305,31 @@ class EntityCreator(object):
 	def create_piece (self, row, col, role, color, tile_entities, select_color, player):
 		e = PieceModelEntity()
 		e.model = self._models[role]
+
+		e.color = color.copy()
 		e.position = tile_entities[col + row * 8].position.copy()
 		e.position[1] += PIECE_STATIC_Y_OFFSET
 		e.rotation = np.zeros(shape = (3,))
 		e.scale = PIECE_STATIC_SCALE.copy()
-		e.color = color.copy()
+
 		e.select_color = select_color.copy()
-		e.original_color = color.copy()
+
+		# dynamically assigned fields
+		e.original_color = e.color.copy()
+		e.original_position = e.position.copy()
+		e.original_rotation = e.rotation.copy()
+		e.original_scale = e.scale.copy()
+
 		e.player = player  # dynamically assign this model to one player
+
+		e.custom_color = e.select_color.copy()
+		e.custom_position = e.position.copy()
+		e.custom_position[1] = PIECE_SELECTION_Y_VALUE
+		e.custom_rotation = e.rotation.copy()
+		if e.player == PLAYER_BLACK:
+			angle = 45.0
+		elif e.player == PLAYER_WHITE:
+			angle = -45.0
+		e.custom_rotation[0] = angle
+		e.custom_scale = PIECE_SELECTION_SCALE.copy()
 		return e
