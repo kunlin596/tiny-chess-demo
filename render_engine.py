@@ -12,9 +12,9 @@ from utils import *
 
 
 class SceneRenderer(QObject):
+
 	def __init__ (self, window = None, camera = None, parent = None):
 		super(SceneRenderer, self).__init__(parent)
-
 		self._window = window
 		self._camera = camera
 		self._shader = None
@@ -82,14 +82,14 @@ class SceneRenderer(QObject):
 	def initialize (self):
 
 		self.set_viewport_size(self._window.size() * self._window.devicePixelRatio())
-		self._mesh_data[CUBE_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'cube', offset = 0.5)
+		self._mesh_data[CUBE_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube_tile.obj', 'cube', offset = 0.5)
 		if RENDER_CUBE_AS_PIECE:
-			self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube2.obj', 'king')
-			self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube2.obj', 'queen')
-			self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube2.obj', 'bishop')
-			self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube2.obj', 'knight')
-			self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube2.obj', 'tower')
-			self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube2.obj', 'pawn')
+			self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/ico_sphere.obj', 'king')
+			self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cube.obj', 'queen')
+			self._mesh_data[CHESS_BISHOP_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cone.obj', 'bishop')
+			self._mesh_data[CHESS_KNIGHT_MODEL_INDEX] = MeshData.ReadFromFile('mesh/torus.obj', 'knight')
+			self._mesh_data[CHESS_TOWER_MODEL_INDEX] = MeshData.ReadFromFile('mesh/cylinder.obj', 'tower')
+			self._mesh_data[CHESS_PAWN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/sphere.obj', 'pawn')
 		else:
 			self._mesh_data[CHESS_KING_MODEL_INDEX] = MeshData.ReadFromFile('mesh/king.obj', 'king')
 			self._mesh_data[CHESS_QUEEN_MODEL_INDEX] = MeshData.ReadFromFile('mesh/queen.obj', 'queen')
