@@ -7,22 +7,23 @@ from PyQt5.QtQml import qmlRegisterType
 
 from window import View
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
+    f = QSurfaceFormat()
+    f.setVersion(4, 1)
+    f.setProfile(QSurfaceFormat.CoreProfile)
+    f.setDefaultFormat(f)
 
-	f = QSurfaceFormat()
-	f.setVersion(4, 1)
-	f.setProfile(QSurfaceFormat.CoreProfile)
-	f.setDefaultFormat(f)
+    app = QGuiApplication(sys.argv)
 
-	app = QGuiApplication(sys.argv)
+    # qmlRegisterType(ModelEntity, 'MyEntity', 1, 0, 'Entity')
+    # qmlRegisterType(ModelEntityList, 'MyEntity', 1, 0, 'EntityList')
 
-	# qmlRegisterType(ModelEntity, 'MyEntity', 1, 0, 'Entity')
-	# qmlRegisterType(ModelEntityList, 'MyEntity', 1, 0, 'EntityList')
+    view = View()
+    view.setResizeMode(
+        QQuickView.SizeRootObjectToView
+    )  # Set for the object to resize correctly
+    view.setSource(QUrl("qml/ModelWindow.qml"))
+    view.show()
 
-	view = View()
-	view.setResizeMode(QQuickView.SizeRootObjectToView)  # Set for the object to resize correctly
-	view.setSource(QUrl('qml/ModelWindow.qml'))
-	view.show()
-
-	app.exec()
+    app.exec()
